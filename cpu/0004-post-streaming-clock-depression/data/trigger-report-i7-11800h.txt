@@ -1,0 +1,115 @@
+> .\ember.exe loadstep --set trigger
+ember loadstep — all-core slowdown after a parallel phase
+set: trigger (what lowers the clock: DRAM vs L3 streaming, pointer chase, read+write, slices, long lead-in)
+tsc 2.304 GHz | 16 workers | rdpru: not advertised by this CPU
+memory: 176 MB of shared buffers (96 MB stream, 16 MB L3-sized, 64 MB chase) + 48 MB of write targets
+12 configurations x 30 repetitions = 360 trials, randomized in blocks (seed 1400973339911)
+estimated time: 94 s (hard limit 120 s); the CPU will be loaded in short bursts. Ctrl+C stops cleanly.
+
+   10% (36/360 trials)
+   20% (72/360 trials)
+   30% (108/360 trials)
+   40% (144/360 trials)
+   50% (180/360 trials)
+   60% (216/360 trials)
+   70% (252/360 trials)
+   80% (288/360 trials)
+   90% (324/360 trials)
+reached the 120 s probe limit after 354 of 360 trials; results below
+
+effective clock (GHz, median) by time since the next load started
+  configuration                                cells    0-0.5  0.5-1    1-2    2-3    3-5   5-10  10-15  15-25  25-40  40-50  rec95(ms)
+  stream uneven -> light                         480    3.472  3.445  3.431  3.464  3.436  3.431  3.394  3.382  3.332  3.244        0.5
+  stream-l3 uneven -> light                      480    2.339  2.334  2.343  2.344  2.345  2.355  2.434  2.594  2.895  3.144       50.0
+  chase uneven -> light                          480    3.787  3.787  3.789  3.788  3.784  3.684  3.456  3.341  3.197  3.175        0.5
+  stream-rw uneven -> light                      480    3.682  3.622  3.566  3.563  3.526  3.506  3.386  3.237  3.158  3.161        0.5
+  stream uneven -> light, 1 thread/core          232    3.581  3.582  3.583  3.536  3.487  3.487  3.486  3.461  3.294  3.382        0.5
+  stream-l3 uneven -> light, 1 thread/core       232    2.791  2.790  2.817  2.842  2.888  2.888  2.889  3.024  3.292  3.439       40.0
+  stream-slices uneven -> light, 1 thread/core   240    3.782  3.780  3.732  3.591  3.591  3.529  3.405  3.292  3.306  3.387        0.5
+  stream-slices uneven -> int8, 1 thread/core    232    3.677  3.588  3.679  3.584  3.484  3.162  2.689  2.393  2.292  2.387        0.5
+  stream uneven -> light, lead 100 ms            464    2.928  2.891  2.947  2.942  2.951  2.980  2.997  3.078  3.185  3.175       25.0
+  light steady -> light                          480    3.293  3.328  3.339  3.338  3.343  3.353  3.370  3.351  3.326  3.254        0.5
+  light steady -> light, 1 thread/core           232    3.489  3.489  3.486  3.487  3.486  3.486  3.579  3.576  3.486  3.391        0.5
+  int8 steady -> int8, 1 thread/core             232    2.391  2.473  2.486  2.488  2.489  2.490  2.586  2.684  2.688  2.688       15.0
+
+clock during the previous phase (GHz, median), ms from the end of the lead-in
+(negative = lead-in, every active thread busy; uneven threads finish between 9 and 17 ms)
+  configuration                                 -100..-70 -70..-40 -40..-20 -20..-10   -10..0     0..4     4..8    8..12   12..17   own last 2 ms
+  stream uneven -> light                                —        —    3.894    3.974    3.968    3.930    3.896    3.739    3.651           3.680
+  stream-l3 uneven -> light                             —        —    3.772    3.582    2.928    2.612    2.514    2.419    2.393           2.408
+  chase uneven -> light                                 —        —    3.701    3.785    3.806    3.815    3.811    3.841    4.078           3.951
+  stream-rw uneven -> light                             —        —    3.928    3.999    4.000    4.004    3.956    3.877    3.880           3.881
+  stream uneven -> light, 1 thread/core                 —        —    3.978    4.083    3.979    3.771    3.684    3.586    3.487           3.581
+  stream-l3 uneven -> light, 1 thread/core              —        —    4.056    3.777    3.286    3.088    2.986    2.886    2.788           2.791
+  stream-slices uneven -> light, 1 thread/core          —        —    4.082    4.095    4.173    4.078    3.890    3.791    3.781           3.780
+  stream uneven -> light, lead 100 ms               3.958    3.450    2.946    2.778    2.761    2.762    2.764    2.780    2.858           2.849
+  light steady -> light                                 —        —    3.746    3.702    3.698    3.605    3.529    3.502    3.422           3.160
+  light steady -> light, 1 thread/core                  —        —    3.982    3.920    3.781    3.587    3.584    3.487    3.486           3.432
+  int8 steady -> int8, 1 thread/core                    —        —    3.788    3.084    2.531    2.391    2.388    2.340    2.291           2.390
+
+against the steady arm with the same next load (1.000 = no change)
+  configuration                                     dip   2-10 ms   lost µs  baseline
+  stream uneven -> light                          1.054     1.026      -405  light steady -> light
+  stream-l3 uneven -> light                       0.710     0.702      8910  light steady -> light
+  chase uneven -> light                           1.150     1.111      -442  light steady -> light
+  stream-rw uneven -> light                       1.118     1.051       785  light steady -> light
+  stream uneven -> light, 1 thread/core           1.026     1.002      1236  light steady -> light, 1 thread/core
+  stream-l3 uneven -> light, 1 thread/core        0.800     0.827      4982  light steady -> light, 1 thread/core
+  stream-slices uneven -> light, 1 thread/core    1.084     1.019      1518  light steady -> light, 1 thread/core
+  stream-slices uneven -> int8, 1 thread/core     1.538     1.324       652  int8 steady -> int8, 1 thread/core
+  stream uneven -> light, lead 100 ms             0.889     0.886      3399  light steady -> light
+  light steady -> light                           1.000     1.000         0  (is the baseline)
+  light steady -> light, 1 thread/core            1.000     1.000         0  (is the baseline)
+  int8 steady -> int8, 1 thread/core              1.000     1.000         0  (is the baseline)
+
+2-10 ms clock across trials (GHz; one value per trial = median over its threads)
+  configuration                                    min     p10     p25  median     max   slow trials
+  stream uneven -> light                          2.74    2.99    3.07    3.44    3.91   5/30 below 90% of baseline
+  stream-l3 uneven -> light                       2.01    2.09    2.25    2.36    3.81   24/30 below 90% of baseline
+  chase uneven -> light                           3.08    3.18    3.45    3.76    3.82   0/30 below 90% of baseline
+  stream-rw uneven -> light                       2.80    3.04    3.19    3.51    3.82   3/30 below 90% of baseline
+  stream uneven -> light, 1 thread/core           2.93    3.18    3.29    3.49    4.18   2/29 below 90% of baseline
+  stream-l3 uneven -> light, 1 thread/core        2.49    2.49    2.69    2.89    4.18   22/29 below 90% of baseline
+  stream-slices uneven -> light, 1 thread/core    2.89    2.99    3.29    3.78    4.18   4/30 below 90% of baseline
+  stream-slices uneven -> int8, 1 thread/core     2.49    2.69    3.08    3.38    4.09   0/29 below 90% of baseline
+  stream uneven -> light, lead 100 ms             2.54    2.63    2.72    2.95    3.90   16/29 below 90% of baseline
+  light steady -> light                           2.75    3.16    3.16    3.34    3.79   2/30 below 90% of baseline
+  light steady -> light, 1 thread/core            2.64    3.18    3.38    3.49    4.18   3/29 below 90% of baseline
+  int8 steady -> int8, 1 thread/core              2.24    2.38    2.39    2.49    4.09   0/29 below 90% of baseline
+
+issue rate, cycles per iteration (early 0-2 ms / late 15-25 ms): B = integer, V = FMA
+  stream uneven -> light                        B 9.42 / 9.42   V — / —
+  stream-l3 uneven -> light                     B 9.42 / 9.42   V — / —
+  chase uneven -> light                         B 9.43 / 9.41   V — / —
+  stream-rw uneven -> light                     B 9.43 / 9.42   V — / —
+  stream uneven -> light, 1 thread/core         B 4.91 / 4.92   V — / —
+  stream-l3 uneven -> light, 1 thread/core      B 4.91 / 4.92   V — / —
+  stream-slices uneven -> light, 1 thread/core  B 4.91 / 4.92   V — / —
+  stream-slices uneven -> int8, 1 thread/core   B 4.91 / 4.91   V 5.13 / 5.13
+  stream uneven -> light, lead 100 ms           B 9.43 / 9.43   V — / —
+  light steady -> light                         B 9.42 / 9.42   V — / —
+  light steady -> light, 1 thread/core          B 4.92 / 4.92   V — / —
+  int8 steady -> int8, 1 thread/core            B 4.91 / 4.91   V 5.13 / 5.13
+
+per thread: idle at the barrier vs clock in the first 0.5 ms / over 2-10 ms (GHz, median; n)
+  configuration                                           0-0.05 ms            0.05-1 ms               1-2 ms               2-4 ms               4-8 ms               >=8 ms
+  stream uneven -> light                           3.79 / 3.79 (17)     3.34 / 3.10 (24)     3.37 / 3.12 (22)     3.33 / 3.13 (43)     3.31 / 3.12 (74)    3.77 / 3.78 (300)
+  stream-l3 uneven -> light                         2.44 / 2.54 (6)     2.34 / 2.29 (45)     2.27 / 2.26 (48)     2.26 / 2.27 (95)    2.27 / 2.28 (159)    3.17 / 3.24 (127)
+  chase uneven -> light                            3.79 / 3.79 (25)     3.79 / 3.76 (26)     3.79 / 3.68 (54)     3.79 / 3.77 (86)    3.79 / 3.74 (165)    3.73 / 3.77 (124)
+  stream-rw uneven -> light                        3.78 / 3.78 (18)     3.55 / 3.34 (31)     3.77 / 3.39 (34)     3.77 / 3.75 (73)    3.76 / 3.41 (125)    3.59 / 3.54 (199)
+  stream uneven -> light, 1 thread/core            4.08 / 4.04 (14)     3.36 / 3.27 (12)     3.49 / 3.48 (18)     3.49 / 3.48 (36)     3.49 / 3.48 (53)     4.08 / 3.99 (99)
+  stream-l3 uneven -> light, 1 thread/core          3.58 / 3.58 (7)     2.89 / 2.89 (34)     2.79 / 2.79 (23)     2.79 / 2.79 (46)     2.79 / 2.79 (69)     3.04 / 3.03 (53)
+  stream-slices uneven -> light, 1 thread/core     4.16 / 4.18 (14)     3.68 / 3.44 (20)     3.58 / 3.38 (21)     3.58 / 3.39 (38)     3.58 / 3.34 (69)     3.99 / 3.98 (78)
+  stream-slices uneven -> int8, 1 thread/core      4.00 / 3.38 (13)     3.48 / 3.23 (15)     3.68 / 3.23 (25)     3.58 / 3.24 (51)     3.68 / 3.26 (73)     3.90 / 3.58 (55)
+  stream uneven -> light, lead 100 ms               3.78 / 3.79 (4)     2.73 / 2.80 (36)     2.70 / 2.72 (24)     2.69 / 2.71 (51)     2.70 / 2.72 (91)    3.31 / 3.28 (258)
+
+reading:
+  dip < 1: the first 0.5 ms run slower than steady state (per-core wake-up ramp, finding 0003).
+  2-10 ms < 1: a sustained slowdown, the signature of finding 0001; check it in the threads that
+  did NOT sleep (idle < 1 ms): a per-core ramp cannot slow them, a chip-wide current limit can.
+  stream (DRAM) vs stream-l3 vs chase (stalls, little bandwidth) vs stream-rw: which memory activity lowers
+  the clock while it runs and afterwards; stream-slices vs stream at 1 thread/core (part-3 discrepancy);
+  lead 100 ms: how low the clock goes with longer streaming, and how fast.
+  APERF/MPERF and B/V tell a real clock drop from an issue limit.
+
+per-thread, per-trial data: loadstep-trigger-1791145967.csv (kept locally, not published)
