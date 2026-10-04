@@ -1,6 +1,6 @@
 # 0004 — Fast streaming reads lower the whole chip's clock, and the next phase pays for 10–40 ms
 
-**Status:** single machine
+**Status:** two machines (Zen 3 desktop; Intel Tiger Lake-H laptop, `trigger` set only)
 **Area:** cpu
 **Date:** 2026-10-04
 
@@ -145,6 +145,59 @@ their last 2 ms, the last ones 2.84. A likely reason: as threads drop
 out, the remaining threads' slices fit in L3, so the tail turns into
 L3-resident streaming, the strongest trigger above.
 
+### Replication on Intel Tiger Lake-H (2026-10-04)
+
+Same tool, `ember loadstep --set trigger`, on a laptop:
+
+| Item | Value |
+|---|---|
+| CPU | Intel Core i7-11800H (Tiger Lake-H), 8 cores / 16 threads, 1.25 MB L2 per core, 24 MB L3 |
+| Memory | DDR4-3200, **single channel** (one 8 GB module) |
+| Machine | Dell G15 5511, on AC power, vendor power mode "Balanced" (Alienware Command Center) |
+| OS | Windows, normal user, no admin |
+| Clock method | Instruction timing only: the CPU does not advertise `RDPRU` (an AMD instruction), so there is no APERF/MPERF cross-check |
+| Deviations | The session hit Ember's 120 s probe limit after 354 of 360 trials (the slower clock stretched it); the pause before the session was not recorded |
+
+Full report: [`data/trigger-report-i7-11800h.txt`](data/trigger-report-i7-11800h.txt).
+All threads, next load `light`, against the `light steady` baseline
+(3.34 GHz over 2–10 ms):
+
+| Previous phase | Clock while running (−20..−10 ms) | 2–10 ms vs steady | Slow trials | Worst trial |
+|---|---|---|---|---|
+| `stream` (DRAM) | 3.97 | 1.026 | 5/30 | 2.74 |
+| `stream-l3` (fits L3) | **3.58**, then **2.39** at its end | **0.702** | **24/30** | 2.01 |
+| `chase` (stalls, little bandwidth) | 3.79 | 1.111 | 0/30 | 3.08 |
+| `stream-rw` (DRAM read + write) | 4.00 | 1.051 | 3/30 | 2.80 |
+| `stream`, 100 ms lead-in | 2.78 | 0.886 | 16/29 | 2.54 |
+
+One thread per core: `stream-l3` 0.827 (22/29 slow trials), `stream`
+1.002, `stream-slices` 1.019.
+
+- **The L3 trigger reproduces, and it is the only strong one again.**
+  While `stream-l3` runs the clock falls from ~3.8 to ~2.4 GHz; the next
+  phase starts there (2.34 GHz over 0–0.5 ms, against 3.29 steady) and
+  reaches 95% of steady after ~50 ms. Threads that never slept at the
+  barrier are as slow as the rest (2.29–2.54 GHz over 2–10 ms), so it is chip-wide
+  here too.
+- **Pointer chasing does nothing**, and short DRAM streaming does nothing,
+  as on Zen 3.
+- **Long DRAM streaming matters more here:** with a 100 ms lead-in the
+  clock falls to ~2.8 GHz while it runs, and the next phase pays 0.886×
+  (16/29 slow trials). On Zen 3 the same arm settled near 3.7 GHz.
+  Single-channel memory and a laptop power budget are both candidates;
+  not separated.
+- **Not reproduced:** the `stream-slices` collapse (0.5–1.9 GHz on Zen 3).
+  Here 8 × 6 MB = 48 MB is twice the 24 MB L3, and the tail of the phase
+  stays at 3.8–3.9 GHz (1.019, 4/30 slow trials).
+- **The laptop's baseline is lower and moves more:** `light steady` runs
+  at 3.29–3.37 GHz with all threads, and `int8 steady` at 2.39–2.69 GHz
+  (power-limited). Ratios against the steady arm are the comparable
+  number, not GHz.
+
+Inside the LLM engine on this laptop, the post-attention drop does not
+show: a sustained prefill holds every core at the laptop's power limit
+(~2.1 GHz), below the clock the L3 trigger leaves.
+
 ## What was ruled out
 
 | Hypothesis | Test | Verdict |
@@ -158,7 +211,7 @@ L3-resident streaming, the strongest trigger above.
 
 ## Conclusion
 
-**Supported by the data:** on this Zen 3, sustained fast streaming reads
+**Supported by the data:** on the Zen 3 (and, for the L3 trigger, on an Intel Tiger Lake-H laptop too), sustained fast streaming reads
 into the cores make the **whole chip** lower its clock while they run:
 mildly from DRAM (to ~3.7–4.3 GHz), strongly from L3 (to ~2.3 GHz). The
 **next phase starts at that clock** and needs 10–15 ms to recover, and up
@@ -205,10 +258,13 @@ in isolation will not see it. Reducing re-reads in the memory-bound phase
   the post-attention clock drop from 15–41% to 5–13%, with bit-identical
   results and an 11–22% faster prefill (finding 0001, section
   "Mitigation inside the engine").
-- Other Zen 3 chips, other generations, Intel?
+- ~~Intel?~~ The L3 trigger reproduces on a Tiger Lake-H laptop
+  (section above). Other Zen 3 chips and other generations remain open.
+- On the laptop: is the stronger long-DRAM effect caused by single-channel
+  memory or by the power budget?
 
 ## Replications
 
 | Who | CPU | Result | Link |
 |---|---|---|---|
-| — | — | — | — |
+| Fabio (laptop) | Intel Core i7-11800H, DDR4-3200 single channel | L3 trigger reproduced (0.702×, 24/30 slow trials); `chase` and short DRAM streaming do nothing; `stream-slices` collapse not reproduced | [section above](#replication-on-intel-tiger-lake-h-2026-10-04) |
