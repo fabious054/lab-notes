@@ -23,6 +23,7 @@ Por [Fabio Henrique](https://github.com/fabious054) (CodeWave.IT).
 |---|---|---|---|
 | 0001 | [Os núcleos ficam 1,5–1,8× mais lentos por ~10 ms depois de uma fase paralela que termina desigual](cpu/0001-post-attention-slowdown/) | cpu | Rascunho: uma máquina só, mecanismo em aberto |
 | 0002 | [APERF/MPERF podem ser lidos do modo usuário no Windows pelo RDPRU](cpu/0002-rdpru-user-mode-windows/) | cpu | Uma máquina só |
+| 0003 | [Um núcleo que dorme mais de ~1–2 ms volta ~20% mais lento por até 1 ms](cpu/0003-core-wake-ramp/) | cpu | Uma máquina só |
 
 ## Como ler um achado
 

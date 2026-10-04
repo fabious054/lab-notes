@@ -104,16 +104,37 @@ time scale.
 
 ## Open questions
 
-- **Which mechanism?** Per thread, correlate the idle time in the
-  attention tail with the probe slowdown: growing with idle time points
-  to a clock ramp; uniform points to a current limit or to clocks shared
-  between cores. Planned as a probe in Ember, my CPU lab.
+- **Which mechanism?** The per-thread idle test has now been run on a
+  synthetic workload: idle cores do ramp back (finding 0003), but only by
+  ~20% for under 1 ms, too small and too short to explain this finding,
+  and threads that never idled were not affected there. The
+  current-limit hypothesis remains, pending a test with high-power
+  loads.
 - Is it a real clock drop or an instructions-per-cycle limit? These
   probes cannot tell the two apart.
 - Does it happen on other Zen 3 chips, other generations, Intel?
 - Balancing the attention work (finer tasks, shorter idle tail) cut the
   `o_proj` time by 19% on the smaller Qwen3-0.6B, but left it unchanged
   on the 1.7B and 4B. Why?
+
+## Synthetic reproduction attempt (2026-10-04)
+
+Ember's `ember loadstep` recreated the pattern without the LLM engine: 16
+pinned threads, a 30 ms busy lead-in, a phase whose threads finish one by
+one over 9–17 ms (like the attention heads), a blocking barrier, then a new
+load, with the clock read every ~64 µs by timed instructions and by
+APERF/MPERF.
+
+- It **did not reproduce** the 1.5–1.8×, ~10 ms slowdown on all threads.
+- It found a smaller, separate effect: cores whose thread **slept** more
+  than ~1–2 ms restart ~20% slower for 0.5–1 ms, while threads that did
+  not sleep start at full clock in the same trial
+  ([finding 0003](../0003-core-wake-ramp/)).
+- Limitation: the synthetic "heavy" load (FMA on constant registers) draws
+  little power (16 threads lose only ~2% clock in steady state), so the
+  current-limit hypothesis is **not tested yet**. Next: high-toggle FMA
+  and int8 loads on random data, and a memory-streaming previous phase,
+  closer to the real attention and `o_proj`.
 
 ## Replications
 
