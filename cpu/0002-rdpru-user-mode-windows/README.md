@@ -1,6 +1,6 @@
 # 0002 — APERF/MPERF are readable from user mode on Windows through RDPRU
 
-**Status:** single machine
+**Status:** single machine (tested with Memory Integrity off and on)
 **Area:** cpu
 **Date:** 2026-10-04
 
@@ -18,7 +18,7 @@ rights and no driver?** We found no source that answers this.
 | Item | Value |
 |---|---|
 | CPU | AMD Ryzen 7 5700X (Zen 3), 8 cores / 16 threads |
-| OS | Windows (exact build and virtualization-based security state not recorded) |
+| OS | Windows (exact build not recorded); tested with Core isolation → Memory Integrity **off**, then **on** (msinfo32: "Hypervisor enforced Code Integrity" running) |
 | Privileges | Normal user, no admin, no driver |
 | Toolchain | Rust, MSVC, release build |
 | Tool | Ember (CPU lab, private for now): `ember __rdpru-sample` and `ember sensor` |
@@ -67,6 +67,24 @@ TSC rate 3.394 GHz. MPERF tracks the TSC exactly while the core spins, as
 expected on Zen, and APERF runs 1.3676× faster: 4.642 GHz, the 5700X's
 single-core boost.
 
+### Same result with Memory Integrity on (Windows on the Hyper-V layer)
+
+After enabling Memory Integrity and rebooting (msinfo32 lists
+"Hypervisor enforced Code Integrity" among the running virtualization-based
+security services), the same check
+([`data/child-pinned-hvci.txt`](data/child-pinned-hvci.txt)):
+
+| Interval | ΔTSC | ΔMPERF | ΔMPERF/ΔTSC | ΔAPERF/ΔMPERF | Clock |
+|---|---|---|---|---|---|
+| 1 | 68,112,132 | 68,112,132 | 1.0000 | 1.3676 | 4.642 GHz |
+| 2 | 68,070,040 | 68,067,252 | 1.0000 | 1.3676 | 4.642 GHz |
+| 3 | 68,262,174 | 68,247,826 | 0.9998 | 1.3676 | 4.642 GHz |
+| 4 | 68,220,966 | 68,220,966 | 1.0000 | 1.3676 | 4.642 GHz |
+| 5 | 68,286,960 | 68,286,927 | 1.0000 | 1.3676 | 4.642 GHz |
+
+The hypervisor neither blocks nor virtualizes the counters: same ratio,
+same clock, to four digits.
+
 ### It agrees with an independent clock measurement
 
 Full output: [`data/sensor.txt`](data/sensor.txt).
@@ -76,6 +94,10 @@ Full output: [`data/sensor.txt`](data/sensor.txt).
 | One thread at a time, each physical core | 4.628 GHz ± 0.1% | 4.643 GHz ± 0.1% | 0.3% |
 | 8 threads, one per core | 4.628 GHz | 4.642–4.643 GHz | 0.3% |
 | 16 threads (SMT) | 4.554 GHz | 4.567–4.568 GHz | 0.3% |
+
+With Memory Integrity on ([`data/sensor-hvci.txt`](data/sensor-hvci.txt)):
+4.628 vs 4.642–4.643 GHz (passes 1–2) and 4.526 vs 4.543 GHz (pass 3),
+the same 0.3–0.4% gap.
 
 The constant 0.3% offset is consistent with the timing overhead
 (`lfence; rdtsc`, ~100 cycles) included in the instruction-timed load of
@@ -92,8 +114,8 @@ thread on one core for the whole interval.
 
 ## Conclusion
 
-**Supported by the data:** on this Windows machine, `RDPRU` runs from user
-mode with no admin rights and no driver, and APERF/MPERF are real (not
+**Supported by the data:** on this Windows machine, with Memory Integrity
+both off and on, `RDPRU` runs from user mode with no admin rights and no driver, and APERF/MPERF are real (not
 zero, not virtualized copies). The true core clock they give agrees with an
 independent instruction-timing measurement within 0.3%.
 
@@ -103,9 +125,6 @@ reading these registers normally requires on Windows.
 
 ## Open questions
 
-- Does it hold with virtualization-based security / Memory Integrity on?
-  This machine's state was not recorded. Under Hyper-V the counters could
-  be intercepted or virtualized.
 - Which Windows builds? Zen 2 and Zen 4/5 parts?
 - Intel CPUs do not implement `RDPRU`; there is no equivalent user-mode
   path there.
