@@ -97,4 +97,4 @@ reading:
   rest -> int8 (load step from idle), 1 thread/core (no SMT); and the steady clock of each load.
   APERF/MPERF and B/V tell a real clock drop from an issue limit.
 
-per-thread, per-trial data: (local CSV, 5,760 rows; per-trial summary in trial-summary.csv)
+per-thread, per-trial data: (local CSV, 5,760 rows; per-configuration summary in config-summary.csv)
