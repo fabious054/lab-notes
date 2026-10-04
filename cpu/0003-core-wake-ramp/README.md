@@ -118,6 +118,8 @@ latency-sensitive; otherwise its first ~0.5 ms run ~20% slower.
 **What this does not explain:** [finding 0001](../0001-post-attention-slowdown/)
 (1.5–1.8× slower on *all* threads, including those that never idled, for
 ~10 ms) is a different, larger effect.
+[Finding 0004](../0004-post-streaming-clock-depression/) covers that larger
+effect: a chip-wide clock reduction after fast streaming reads.
 
 ## Open questions
 

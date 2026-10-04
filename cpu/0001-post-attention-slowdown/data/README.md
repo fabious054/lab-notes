@@ -12,6 +12,7 @@ warnings and local paths were removed.
 | `v5.txt` | v5 | Output buffer alignment (+0/16/32/48 bytes) |
 | `v6.txt` | v6 | `q_proj` run right after attention; per-task timelines; 0.3 ms spin first |
 | `v7.txt` | v7 | Memory-free probes (integer chain, AVX2 FMA) at three points |
+| `v8-clock.txt` | v8 | CandleCLI `/bench 512 0 --clock`: core clock of every pool thread at five points per layer, 0.6B/1.7B/4B (2026-10-04) |
 
 Line formats:
 
