@@ -1,6 +1,6 @@
 # 0001 — Cores run 1.5–1.8× slower for ~10 ms after an unevenly ending parallel phase
 
-**Status:** draft — single machine; mechanism lead in [finding 0004](../0004-post-streaming-clock-depression/), not yet confirmed in the engine
+**Status:** single machine — mechanism confirmed inside the engine (2026-10-04, see [below](#confirmation-inside-the-engine-2026-10-04)); explained by [finding 0004](../0004-post-streaming-clock-depression/)
 **Area:** cpu
 **Date:** 2026-10-03
 
@@ -102,6 +102,10 @@ to the load pattern. Two candidate mechanisms:
 point to a third mechanism: a chip-wide clock reduction during fast
 streaming reads, which the next phase inherits for ~10 ms
 ([finding 0004](../0004-post-streaming-clock-depression/); details below).
+A clock sensor inside the engine then confirmed it: the effective clock
+of every pool thread falls right after attention, as low as 0.54–0.59
+GHz on Qwen3-1.7B, and is back by the end of the layer
+([confirmation](#confirmation-inside-the-engine-2026-10-04)).
 
 I did not find this documented for Zen 3. The closest documented case
 is on Zen 5, where heavy vector load limits throughput for a similar
@@ -109,16 +113,18 @@ time scale.
 
 ## Open questions
 
-- **Which mechanism?** Synthetic tests (below) ruled out the per-core
-  idle ramp as the main cause (finding 0003: ~20% for under 1 ms, sleepers
-  only) and the current-limit hypothesis (a power-limited phase releases
-  at once). They found a chip-wide slowdown after fast streaming reads,
-  strongest from L3 (finding 0004), with this finding's shape and size in
-  the worst trials. Still to confirm: that it happens around attention
-  inside the engine.
-- Is it a real clock drop or an instructions-per-cycle limit? These
-  probes cannot tell the two apart. (In the synthetic tests it is a real
-  clock drop: APERF/MPERF agree.)
+- ~~Which mechanism?~~ Answered: a chip-wide clock drop after fast
+  streaming reads (finding 0004), measured inside the engine around
+  attention (section below).
+- ~~Real clock drop or an instructions-per-cycle limit?~~ A clock drop:
+  the in-engine sensor is a dependent-add chain timed with the TSC, which
+  instruction-per-cycle limits on memory cannot slow, and in the
+  synthetic tests it agreed with APERF/MPERF within ~0.3%.
+- Why is Qwen3-1.7B hit so much harder (0.14× of the pre-attention clock)
+  than 0.6B (0.86×) and 4B (0.67×)? Not explained yet. 0.6B and 1.7B have
+  the same attention shape (16 query heads, 8 K/V heads, head_dim 128),
+  but in these runs 0.6B used 16 threads and 1.7B used 12. A rerun of
+  1.7B on 16 threads is the first thing to check.
 - Does it happen on other Zen 3 chips, other generations, Intel?
 - Balancing the attention work (finer tasks, shorter idle tail) cut the
   `o_proj` time by 19% on the smaller Qwen3-0.6B, but left it unchanged
@@ -162,8 +168,48 @@ during the previous phase too. Full write-up:
 
 So the leading explanation is now: the attention phase (its K/V likely
 fits in L3 at 512 tokens) streams fast enough to lower the chip's clock,
-and `o_proj` pays for it during the ~10 ms the clock needs to recover. Not
-yet measured inside the engine.
+and `o_proj` pays for it during the ~10 ms the clock needs to recover.
+Measured inside the engine on 2026-10-04: see the next section.
+
+## Confirmation inside the engine (2026-10-04)
+
+CandleCLI's `/bench 512 0 --clock` (issue #120) runs a ~8 µs clock sensor
+on **every thread of the pool** at five points of every layer during a
+512-token prefill: one dependent integer add per cycle, timed with the
+TSC, no memory access (the same method as Ember's sensor). Fast (int8)
+mode, Ryzen 7 5700X, 3 repetitions, all layers and threads pooled.
+Raw: [`data/v8-clock.txt`](data/v8-clock.txt).
+
+Median effective clock in GHz (10th percentile in brackets):
+
+| Point in each layer | Qwen3-0.6B (16 threads) | Qwen3-1.7B (12) | Qwen3-4B (12) |
+|---|---|---|---|
+| Before Q/K/V | 4.15 (3.93) | 4.20 (3.48) | 4.28 (3.51) |
+| Before attention | 4.05 (3.94) | 4.13 (4.02) | 4.12 (4.01) |
+| **Right after attention** | **3.58 (3.16)** | **0.59 (0.54)** | **2.88 (2.72)** |
+| After `o_proj` | 3.52 (2.94) | 2.48 (2.36) | 4.13 (3.96) |
+| After the MLP | 4.08 (3.92) | 4.04 (3.91) | 4.08 (3.36) |
+| After attention ÷ before Q/K/V | 0.862 | **0.140** | 0.673 |
+
+- **The clock falls during attention and the next multiplication starts
+  there.** Before attention every model runs at ~4.1 GHz; right after,
+  every thread reads lower. By the end of the MLP all three are back at
+  ~4.05 GHz.
+- **Qwen3-1.7B is the extreme case:** `o_proj` starts at 0.54–0.59 GHz and
+  still runs at only ~2.5 GHz when it ends. 0.54 GHz is the same floor
+  Ember measured with L3-sized private slices (finding 0004). This
+  matches the original question: `o_proj` took 528 ms per pp512 against
+  ~210 ms expected from `q_proj` (same 2048×2048 shape; `q_proj` is about
+  half of the Q/K/V stage's 419 ms) — ~300 ms, ~9% of the prefill.
+- **Qwen3-4B** drops less and recovers before `o_proj` ends, and its
+  `o_proj` shows almost no excess (665 ms against ~640 ms expected).
+- The sensor took 0.13–0.84% of the prefill; with it off, outputs were
+  identical to the build without it.
+
+Caveat: each sample is a `rayon::broadcast`, so it wakes every worker and
+is itself a synchronization point. It reads the clock a worker has when
+the next phase would start, which is what that phase pays; it does not
+read the clock of a core that stays asleep.
 
 ## Replications
 

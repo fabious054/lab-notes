@@ -174,8 +174,13 @@ traffic from L3 weighs more than traffic from DRAM.
 
 **Link to finding 0001:** a 512-token attention phase whose K/V fits in
 L3 is the strongest trigger measured, and the worst trials (2.5–3.0 GHz
-against 4.6) match 0001's 1.5–1.8× over ~10 ms. Not yet confirmed inside
-the engine itself.
+against 4.6) match 0001's 1.5–1.8× over ~10 ms. **Confirmed inside the
+engine (2026-10-04):** a clock sensor on every pool thread read, right
+after attention, 0.86× (Qwen3-0.6B), **0.14×** (Qwen3-1.7B, median 0.59
+GHz, floor 0.54 — the same floor as the private-slices case above) and
+0.67× (Qwen3-4B) of the clock before Q/K/V, back to normal by the end of
+the layer. Details and raw data in
+[finding 0001](../0001-post-attention-slowdown/#confirmation-inside-the-engine-2026-10-04).
 
 **Practical reading for parallel code:** after a memory-bound phase, the
 next phase may run well below the clock it would get in steady state, on
@@ -192,8 +197,11 @@ in isolation will not see it.
   recovery to ~2 ms (`--set stream`: 4/30 slow trials instead of 13/30)?
 - Run-to-run variation: the shared DRAM arm was clearly milder in the
   `trigger` session (6/30 slow trials) than in the `stream` session (17/30).
-- Does it happen inside the LLM engine, around attention? (A clock probe
-  during and after attention would tell.)
+- ~~Does it happen inside the LLM engine, around attention?~~ Yes, see
+  finding 0001 (2026-10-04).
+- Can the engine avoid it without changing results? Next: fewer K/V
+  passes in attention (several query rows per pass) and threads spinning
+  instead of sleeping, each measured with the same sensor.
 - Other Zen 3 chips, other generations, Intel?
 
 ## Replications

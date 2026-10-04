@@ -1,0 +1,141 @@
+# Round v8 (2026-10-04): core clock at five points per layer, inside the engine
+# CandleCLI `/bench 512 0 --clock` (issue #120, commit e27c9a6), fast mode, Ryzen 7 5700X.
+# Each bench below is copied verbatim; only the cargo/linker lines were removed.
+
+## qwen3 (0.6B)
+┌─ bench  qwen3  ·  16/4 threads (prefill/decode)  ·  3 reps  ·  0.64 GB  ·  mode fast 
+│ pp512       444.41 ± 16.93   tok/s   (1153.2 ms)
+│ 
+│ stages — prefill (ms per pp512):
+│   input ids             0.003    0.0%
+│   embedding             0.398    0.0%
+│   attn norm             2.281    0.2%
+│   q/k/v proj          208.707   18.1%
+│   q/k norm + rope       9.308    0.8%
+│   kv append             7.378    0.6%
+│   attention core      310.699   26.9%
+│   o proj              126.103   10.9%
+│   ffn norm              2.489    0.2%
+│   gate/up + swiglu    315.009   27.3%
+│   down proj           149.581   13.0%
+│   residual adds         5.139    0.4%
+│   tensor <-> vec        0.122    0.0%
+│   final norm            0.002    0.0%
+│   lm head               6.020    0.5%
+│   logits out            0.138    0.0%
+│   unattributed          9.842    0.9%
+│   forward total      1153.219
+│ 
+│ parallel regions — prefill (per pp512):
+│   regions               589.0
+│   inside regions     1120.717   97.2%
+│   outside (serial)     32.502    2.8%
+│   ≈ coordination        2.415 – 5.478 ms  (0.2–0.5%)
+│ 
+│ core clock — prefill (GHz, every pool thread, TSC 3.394 GHz):
+│   point              median             IQR     p10  readings
+│   before q/k/v         4.15    4.00 – 4.25     3.93      1344
+│   before attention     4.05    3.98 – 4.16     3.94      1344
+│   after attention      3.58    3.39 – 3.62     3.16      1344
+│   after o proj         3.52    3.23 – 3.84     2.94      1344
+│   after mlp            4.08    3.96 – 4.22     3.92      1344
+│   after attention vs before q/k/v: 0.862 (-13.8%)
+│   sensor overhead: 28.91 ms (0.84% of prefill)
+│ 
+│ empty parallel region (4 threads, 1024 items, median):
+│   back-to-back           4.10 µs
+│   after 20 µs gap        8.90 µs
+│   after 200 µs gap       9.30 µs
+└──────────────────────────────────────────────────────────────────────────────────
+
+## qwen3-1.7b
+┌─ bench  qwen3-1.7b  ·  12/4 threads (prefill/decode)  ·  3 reps  ·  1.83 GB  ·  mode fast 
+│ pp512       152.34 ± 2.91    tok/s   (3361.7 ms)
+│ 
+│ stages — prefill (ms per pp512):
+│   input ids             0.007    0.0%
+│   embedding             0.941    0.0%
+│   attn norm             9.193    0.3%
+│   q/k/v proj          419.149   12.5%
+│   q/k norm + rope       8.616    0.3%
+│   kv append            10.723    0.3%
+│   attention core      556.708   16.6%
+│   o proj              528.349   15.7%
+│   ffn norm              8.758    0.3%
+│   gate/up + swiglu   1199.476   35.7%
+│   down proj           578.179   17.2%
+│   residual adds        11.340    0.3%
+│   tensor <-> vec        0.520    0.0%
+│   final norm            0.003    0.0%
+│   lm head              11.904    0.4%
+│   logits out            0.224    0.0%
+│   unattributed         17.646    0.5%
+│   forward total      3361.738
+│ 
+│ parallel regions — prefill (per pp512):
+│   regions               589.0
+│   inside regions     3288.177   97.8%
+│   outside (serial)     73.561    2.2%
+│   ≈ coordination        2.533 – 3.357 ms  (0.1–0.1%)
+│ 
+│ core clock — prefill (GHz, every pool thread, TSC 3.394 GHz):
+│   point              median             IQR     p10  readings
+│   before q/k/v         4.20    4.07 – 4.27     3.48      1008
+│   before attention     4.13    4.07 – 4.21     4.02      1008
+│   after attention      0.59    0.54 – 1.71     0.54      1008
+│   after o proj         2.48    2.41 – 2.57     2.36      1008
+│   after mlp            4.04    3.99 – 4.13     3.91      1008
+│   after attention vs before q/k/v: 0.140 (-86.0%)
+│   sensor overhead: 51.89 ms (0.51% of prefill)
+│ 
+│ empty parallel region (4 threads, 1024 items, median):
+│   back-to-back           4.30 µs
+│   after 20 µs gap        7.90 µs
+│   after 200 µs gap       5.70 µs
+└───────────────────────────────────────────────────────────────────────────────────────
+
+## qwen3-4b
+┌─ bench  qwen3-4b  ·  12/4 threads (prefill/decode)  ·  3 reps  ·  4.28 GB  ·  mode fast 
+│ pp512        71.97 ± 1.17    tok/s   (7115.3 ms)
+│ 
+│ stages — prefill (ms per pp512):
+│   input ids             0.006    0.0%
+│   embedding             0.933    0.0%
+│   attn norm            16.053    0.2%
+│   q/k/v proj          960.193   13.5%
+│   q/k norm + rope      18.272    0.3%
+│   kv append            14.285    0.2%
+│   attention core     1133.807   15.9%
+│   o proj              665.783    9.4%
+│   ffn norm             15.890    0.2%
+│   gate/up + swiglu   2815.799   39.6%
+│   down proj          1429.877   20.1%
+│   residual adds        20.043    0.3%
+│   tensor <-> vec        0.506    0.0%
+│   final norm            0.004    0.0%
+│   lm head              14.133    0.2%
+│   logits out            0.251    0.0%
+│   unattributed          9.434    0.1%
+│   forward total      7115.269
+│ 
+│ parallel regions — prefill (per pp512):
+│   regions               757.0
+│   inside regions     7011.197   98.5%
+│   outside (serial)    104.073    1.5%
+│   ≈ coordination        3.104 – 4.315 ms  (0.0–0.1%)
+│ 
+│ core clock — prefill (GHz, every pool thread, TSC 3.394 GHz):
+│   point              median             IQR     p10  readings
+│   before q/k/v         4.28    4.15 – 4.39     3.51      1296
+│   before attention     4.12    4.06 – 4.20     4.01      1296
+│   after attention      2.88    2.80 – 2.96     2.72      1296
+│   after o proj         4.13    4.06 – 4.21     3.96      1296
+│   after mlp            4.08    3.95 – 4.16     3.36      1296
+│   after attention vs before q/k/v: 0.673 (-32.7%)
+│   sensor overhead: 27.20 ms (0.13% of prefill)
+│ 
+│ empty parallel region (4 threads, 1024 items, median):
+│   back-to-back           4.10 µs
+│   after 20 µs gap        9.00 µs
+│   after 200 µs gap       5.70 µs
+└───────────────────────────────────────────────────────────────────────────────────────
