@@ -22,6 +22,7 @@ Por [Fabio Henrique](https://github.com/fabious054) (CodeWave.IT).
 | # | Achado | Área | Status |
 |---|---|---|---|
 | 0001 | [Os núcleos ficam 1,5–1,8× mais lentos por ~10 ms depois de uma fase paralela que termina desigual](cpu/0001-post-attention-slowdown/) | cpu | Rascunho: uma máquina só, mecanismo em aberto |
+| 0002 | [APERF/MPERF podem ser lidos do modo usuário no Windows pelo RDPRU](cpu/0002-rdpru-user-mode-windows/) | cpu | Uma máquina só |
 
 ## Como ler um achado
 
