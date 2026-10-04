@@ -1,0 +1,4 @@
+$ ./target/release/ember.exe sensor
+ember sensor — clock/IPC sensor self-check
+tsc 3.394 GHz | FMA load on | pinning on
+rdpru (APERF/MPERF): counters not trustworthy (NotIncreasing); using instruction timing only
