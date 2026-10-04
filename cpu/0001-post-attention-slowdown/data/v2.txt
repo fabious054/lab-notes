@@ -1,0 +1,15 @@
+running 1 test
+DIAG forward pp512 3136 ms (incl. the extra o_proj calls), 28 layers
+DIAG in-forward sums: q_proj 182.9 ms | o_proj 1st 407.5 ms | o_proj 2nd (same input, right after) 274.8 ms
+DIAG in-forward blk. 0: q_proj   6.98 ms | o_proj 1st  13.25 ms | 2nd   9.40 ms
+DIAG in-forward blk.13: q_proj   6.40 ms | o_proj 1st  14.66 ms | 2nd  10.95 ms
+DIAG in-forward blk.27: q_proj   7.00 ms | o_proj 1st  11.90 ms | 2nd   9.74 ms
+DIAG inputs blk. 0: attn input: max |v| 3.2106764e0, subnormal 0, non-finite 0 of 1048576 | context: max |v| 1.545892e0, subnormal 0, non-finite 0 of 1048576
+DIAG isolated blk. 0 (16 thr): q_proj(attn input)   8.32 | q_proj(context)   8.63 | o_proj(attn input)   8.19 | o_proj(context)   7.98 ms
+DIAG inputs blk.13: attn input: max |v| 5.1942425e1, subnormal 0, non-finite 0 of 1048576 | context: max |v| 9.303539e0, subnormal 0, non-finite 0 of 1048576
+DIAG isolated blk.13 (16 thr): q_proj(attn input)   8.17 | q_proj(context)   7.98 | o_proj(attn input)   7.97 | o_proj(context)   7.92 ms
+DIAG inputs blk.27: attn input: max |v| 2.945248e2, subnormal 0, non-finite 0 of 1048576 | context: max |v| 1.1782098e2, subnormal 0, non-finite 0 of 1048576
+DIAG isolated blk.27 (16 thr): q_proj(attn input)   8.18 | q_proj(context)   7.95 | o_proj(attn input)   7.99 | o_proj(context)   8.28 ms
+test arch::qwen::layers::tests::diag_oproj_in_forward ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 276 filtered out; finished in 10.87s

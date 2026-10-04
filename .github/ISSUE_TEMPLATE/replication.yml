@@ -1,0 +1,49 @@
+name: Replication
+description: You ran a finding on your own machine — share the result, whether it agrees or not.
+title: "[Replication] NNNN on <your CPU>"
+labels: ["replication"]
+body:
+  - type: input
+    id: finding
+    attributes:
+      label: Finding
+      description: Number and title, e.g. "0001 — Cores run slower after an unevenly ending parallel phase".
+    validations:
+      required: true
+  - type: input
+    id: cpu
+    attributes:
+      label: CPU
+      description: Exact model, e.g. "AMD Ryzen 5 5600X" or "Intel Core i7-12700K".
+    validations:
+      required: true
+  - type: textarea
+    id: machine
+    attributes:
+      label: Rest of the machine
+      description: Memory type and speed, OS and version, power plan, toolchain, thread count.
+    validations:
+      required: true
+  - type: dropdown
+    id: outcome
+    attributes:
+      label: Outcome
+      options:
+        - Reproduced
+        - Partly reproduced
+        - Not reproduced
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Raw output
+      description: Paste the console output as is. Remove local paths and anything personal.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Protocol notes
+      description: Anything you did differently from PROTOCOL.md (pauses, background load, cooling…).
