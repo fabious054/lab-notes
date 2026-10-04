@@ -1,6 +1,6 @@
 # 0001 — Cores run 1.5–1.8× slower for ~10 ms after an unevenly ending parallel phase
 
-**Status:** draft — single machine, mechanism open
+**Status:** draft — single machine; mechanism lead in [finding 0004](../0004-post-streaming-clock-depression/), not yet confirmed in the engine
 **Area:** cpu
 **Date:** 2026-10-03
 
@@ -98,26 +98,33 @@ to the load pattern. Two candidate mechanisms:
 - **Current limit on a load step:** all cores jump to heavy AVX2 work at
   once, and the chip holds performance down until current settles.
 
+*Update 2026-10-04:* synthetic tests ruled out both as the main cause and
+point to a third mechanism: a chip-wide clock reduction during fast
+streaming reads, which the next phase inherits for ~10 ms
+([finding 0004](../0004-post-streaming-clock-depression/); details below).
+
 I did not find this documented for Zen 3. The closest documented case
 is on Zen 5, where heavy vector load limits throughput for a similar
 time scale.
 
 ## Open questions
 
-- **Which mechanism?** The per-thread idle test has now been run on a
-  synthetic workload: idle cores do ramp back (finding 0003), but only by
-  ~20% for under 1 ms, too small and too short to explain this finding,
-  and threads that never idled were not affected there. The
-  current-limit hypothesis remains, pending a test with high-power
-  loads.
+- **Which mechanism?** Synthetic tests (below) ruled out the per-core
+  idle ramp as the main cause (finding 0003: ~20% for under 1 ms, sleepers
+  only) and the current-limit hypothesis (a power-limited phase releases
+  at once). They found a chip-wide slowdown after fast streaming reads,
+  strongest from L3 (finding 0004), with this finding's shape and size in
+  the worst trials. Still to confirm: that it happens around attention
+  inside the engine.
 - Is it a real clock drop or an instructions-per-cycle limit? These
-  probes cannot tell the two apart.
+  probes cannot tell the two apart. (In the synthetic tests it is a real
+  clock drop: APERF/MPERF agree.)
 - Does it happen on other Zen 3 chips, other generations, Intel?
 - Balancing the attention work (finer tasks, shorter idle tail) cut the
   `o_proj` time by 19% on the smaller Qwen3-0.6B, but left it unchanged
   on the 1.7B and 4B. Why?
 
-## Synthetic reproduction attempt (2026-10-04)
+## Synthetic reproduction attempt (2026-10-04, part 2)
 
 Ember's `ember loadstep` recreated the pattern without the LLM engine: 16
 pinned threads, a 30 ms busy lead-in, a phase whose threads finish one by
@@ -132,9 +139,31 @@ APERF/MPERF.
   ([finding 0003](../0003-core-wake-ramp/)).
 - Limitation: the synthetic "heavy" load (FMA on constant registers) draws
   little power (16 threads lose only ~2% clock in steady state), so the
-  current-limit hypothesis is **not tested yet**. Next: high-toggle FMA
-  and int8 loads on random data, and a memory-streaming previous phase,
-  closer to the real attention and `o_proj`.
+  current-limit hypothesis was **not tested** by this run. The next
+  section covers the follow-up with high-power and memory-streaming loads.
+
+## Synthetic tests of the mechanism (2026-10-04, parts 3–5)
+
+Ember's `ember loadstep --set power`, `--set stream` and `--set trigger`
+replaced the constant-register load with loads on random data (int8 dot
+products, DRAM and L3 streaming, pointer chasing) and sampled the clock
+during the previous phase too. Full write-up:
+[finding 0004](../0004-post-streaming-clock-depression/).
+
+- **Current limit (H2): not supported.** A load step into high-power int8
+  work starts fast (4.62 GHz) and settles to the ~4.05 GHz power limit
+  over ~10 ms; after a power-limited phase the clock is back at once.
+- **Streaming reads: reproduces the shape.** During fast streaming reads
+  the whole chip lowers its clock (to ~3.7–4.3 GHz from DRAM, ~2.3 GHz from
+  L3), and the next phase starts there and needs 10–15 ms, on every core.
+  Worst trials reach 2.5–3.0 GHz against 4.6, the 1.5–1.8× of this
+  finding; with L3-sized private slices, down to 0.5 GHz for 40+ ms.
+- **Memory stalls without bandwidth (pointer chasing): no effect.**
+
+So the leading explanation is now: the attention phase (its K/V likely
+fits in L3 at 512 tokens) streams fast enough to lower the chip's clock,
+and `o_proj` pays for it during the ~10 ms the clock needs to recover. Not
+yet measured inside the engine.
 
 ## Replications
 

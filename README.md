@@ -20,9 +20,10 @@ By [Fabio Henrique](https://github.com/fabious054) (CodeWave.IT).
 
 | # | Finding | Area | Status |
 |---|---|---|---|
-| 0001 | [Cores run 1.5–1.8× slower for ~10 ms after an unevenly ending parallel phase](cpu/0001-post-attention-slowdown/) | cpu | Draft: single machine, mechanism open |
+| 0001 | [Cores run 1.5–1.8× slower for ~10 ms after an unevenly ending parallel phase](cpu/0001-post-attention-slowdown/) | cpu | Draft: single machine, mechanism lead in 0004 |
 | 0002 | [APERF/MPERF are readable from user mode on Windows through RDPRU](cpu/0002-rdpru-user-mode-windows/) | cpu | Single machine |
 | 0003 | [A core that sleeps more than ~1–2 ms restarts ~20% slower for up to 1 ms](cpu/0003-core-wake-ramp/) | cpu | Single machine |
+| 0004 | [Fast streaming reads lower the whole chip's clock, and the next phase pays for 10–40 ms](cpu/0004-post-streaming-clock-depression/) | cpu | Single machine |
 
 ## How to read a finding
 
