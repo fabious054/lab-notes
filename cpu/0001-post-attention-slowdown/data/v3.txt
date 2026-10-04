@@ -1,0 +1,10 @@
+running 1 test
+DIAG pass1 sums: q_proj 192.5 | o_proj 1st 397.2 | o_proj 2nd 268.8 ms
+DIAG pass2 sums: q_proj quantize 10.1 + tiles 174.8 | o_proj quantize 26.2 + tiles 363.6 ms
+DIAG pass3 sums: q_proj 180.4 | o_proj on a copy of the context 512.3 ms
+DIAG blk. 0: o_proj 1st 12.98 2nd  8.90 | q quant 0.39 tiles  5.63 | o quant 0.80 tiles 12.96 | o on copy 17.43 ms
+DIAG blk.13: o_proj 1st 12.41 2nd  9.32 | q quant 0.33 tiles  5.90 | o quant 0.65 tiles 11.34 | o on copy 22.84 ms
+DIAG blk.27: o_proj 1st 12.12 2nd  9.67 | q quant 0.37 tiles  6.43 | o quant 0.65 tiles 11.26 | o on copy 23.65 ms
+test arch::qwen::layers::tests::diag_oproj_in_forward ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 276 filtered out; finished in 14.90s

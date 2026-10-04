@@ -1,0 +1,41 @@
+$ powercfg -getactivescheme
+GUID do Esquema de Energia: 381b4222-f694-41f0-9685-ff5bb260df2e  (Equilibrado)
+$ cargo test --release diag_oproj_in_forward -- --ignored --nocapture
+running 1 test
+DIAG pass1 sums: q_proj 182.4 | o_proj 1st 414.5 | o_proj 2nd 269.9 ms
+DIAG pass2 sums: q_proj quantize 10.0 + tiles 172.2 | o_proj quantize 20.8 + tiles 346.9 ms
+DIAG pass3 sums: q_proj 183.2 | o_proj on a copy of the context 498.4 ms
+DIAG pass4 sums: attention core 419.4 | o_proj 1st 396.1 | o_proj 2nd 266.9 ms (pool 16 threads)
+DIAG attn blk. 0: 16.98 ms wall, 16 heads on 16 threads (max 1 per thread), busy 197.1 ms = 73% of wall x threads, first head done at  9.44, last at 16.76 | o_proj 1st 23.47
+DIAG heads blk. 0: h0@t0:0.0-13.2 h5@t6:0.0-12.5 h4@t1:0.0-13.3 h1@t4:0.0-14.4 h12@t7:0.0-9.7 h2@t3:0.1-11.8 h3@t13:0.1-11.3 h6@t5:0.1-10.9 h8@t2:0.1-12.4 h7@t11:0.1-11.2 h9@t12:0.1-16.8 h13@t9:0.1-13.2 h14@t10:0.1-12.3 h10@t8:0.1-12.8 h11@t14:0.1-12.7 h15@t15:0.1-9.4
+DIAG attn blk.13: 14.54 ms wall, 16 heads on 16 threads (max 1 per thread), busy 205.6 ms = 88% of wall x threads, first head done at 11.22, last at 14.49 | o_proj 1st 12.44
+DIAG heads blk.13: h0@t0:0.0-13.6 h1@t4:0.0-13.8 h4@t2:0.0-13.4 h8@t1:0.0-11.4 h6@t5:0.0-12.9 h5@t6:0.0-13.2 h7@t10:0.0-12.5 h10@t8:0.0-13.5 h2@t3:0.0-14.5 h9@t9:0.0-11.4 h3@t13:0.0-12.8 h11@t11:0.0-14.5 h12@t7:0.0-11.3 h14@t12:0.0-12.8 h13@t14:0.1-13.4 h15@t15:0.1-11.2
+DIAG attn blk.27: 14.82 ms wall, 16 heads on 16 threads (max 1 per thread), busy 199.8 ms = 84% of wall x threads, first head done at 10.30, last at 14.77 | o_proj 1st 15.31
+DIAG heads blk.27: h0@t0:0.0-12.5 h2@t3:0.0-14.1 h1@t4:0.0-13.4 h4@t1:0.0-10.8 h6@t5:0.0-11.0 h8@t2:0.1-12.9 h5@t6:0.1-13.5 h9@t13:0.1-11.0 h12@t8:0.1-12.3 h10@t12:0.1-14.8 h3@t7:0.1-12.0 h14@t10:0.1-12.7 h7@t9:0.1-10.3 h11@t11:0.1-14.2 h13@t14:0.1-13.3 h15@t15:0.1-11.9
+DIAG blk. 0: o_proj 1st 20.01 2nd  9.33 | q quant 0.43 tiles  5.95 | o quant 0.72 tiles 13.72 | o on copy 18.33 ms
+DIAG blk.13: o_proj 1st 13.07 2nd  9.45 | q quant 0.32 tiles  5.91 | o quant 0.69 tiles 11.71 | o on copy 14.43 ms
+DIAG blk.27: o_proj 1st 11.97 2nd  9.46 | q quant 0.32 tiles  5.91 | o quant 0.58 tiles 11.52 | o on copy 24.36 ms
+test arch::qwen::layers::tests::diag_oproj_in_forward ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 276 filtered out; finished in 17.78s
+
+$ powercfg -getactivescheme
+GUID do Esquema de Energia: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c  (Alto desempenho)
+$ cargo test --release diag_oproj_in_forward -- --ignored --nocapture
+running 1 test
+DIAG pass1 sums: q_proj 185.6 | o_proj 1st 416.6 | o_proj 2nd 279.2 ms
+DIAG pass2 sums: q_proj quantize 10.0 + tiles 174.1 | o_proj quantize 33.5 + tiles 409.7 ms
+DIAG pass3 sums: q_proj 184.1 | o_proj on a copy of the context 486.6 ms
+DIAG pass4 sums: attention core 430.8 | o_proj 1st 411.1 | o_proj 2nd 271.4 ms (pool 16 threads)
+DIAG attn blk. 0: 14.84 ms wall, 16 heads on 16 threads (max 1 per thread), busy 198.2 ms = 83% of wall x threads, first head done at 10.39, last at 14.77 | o_proj 1st 16.03
+DIAG heads blk. 0: h0@t0:0.0-13.3 h6@t7:0.0-12.6 h5@t8:0.0-13.0 h2@t3:0.0-10.9 h3@t11:0.0-10.9 h1@t4:0.0-13.6 h4@t2:0.0-12.6 h10@t6:0.0-12.7 h11@t13:0.0-10.5 h12@t5:0.0-10.4 h8@t1:0.0-12.7 h7@t9:0.0-12.5 h14@t10:0.0-13.2 h9@t12:0.0-14.8 h15@t14:0.0-12.7 h13@t15:0.1-12.4
+DIAG attn blk.13: 15.68 ms wall, 16 heads on 16 threads (max 1 per thread), busy 204.2 ms = 81% of wall x threads, first head done at  9.33, last at 15.60 | o_proj 1st 13.28
+DIAG heads blk.13: h0@t0:0.0-14.4 h2@t3:0.0-12.5 h10@t6:0.0-9.3 h8@t1:0.1-11.6 h3@t7:0.1-12.2 h4@t2:0.1-13.8 h12@t5:0.1-13.2 h9@t11:0.1-13.4 h13@t9:0.1-13.3 h11@t10:0.1-15.6 h5@t13:0.1-13.3 h1@t4:0.1-13.2 h6@t12:0.1-13.4 h14@t8:0.1-10.3 h15@t14:1.2-15.4 h7@t15:3.7-14.8
+DIAG attn blk.27: 12.99 ms wall, 16 heads on 16 threads (max 1 per thread), busy 183.0 ms = 88% of wall x threads, first head done at 10.03, last at 12.97 | o_proj 1st 12.90
+DIAG heads blk.27: h8@t1:0.0-10.2 h9@t7:0.0-11.7 h6@t11:0.0-13.0 h10@t6:0.0-12.2 h7@t8:0.0-12.1 h11@t10:0.0-10.0 h4@t2:0.0-10.2 h5@t9:0.0-10.3 h0@t0:0.0-12.4 h12@t5:0.0-10.6 h2@t3:0.0-12.9 h1@t4:0.0-11.7 h13@t13:0.0-10.5 h14@t12:0.0-11.6 h3@t14:0.0-12.5 h15@t15:0.1-12.0
+DIAG blk. 0: o_proj 1st 20.62 2nd 10.17 | q quant 0.50 tiles  6.11 | o quant 1.08 tiles 14.12 | o on copy 13.56 ms
+DIAG blk.13: o_proj 1st 13.61 2nd  9.39 | q quant 0.31 tiles  6.51 | o quant 0.71 tiles 12.13 | o on copy 15.16 ms
+DIAG blk.27: o_proj 1st 13.21 2nd 10.07 | q quant 0.35 tiles  6.21 | o quant 0.74 tiles 12.25 | o on copy 12.78 ms
+test arch::qwen::layers::tests::diag_oproj_in_forward ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 276 filtered out; finished in 18.16s

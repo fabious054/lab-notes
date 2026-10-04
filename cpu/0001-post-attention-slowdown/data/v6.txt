@@ -1,0 +1,11 @@
+running 1 test
+DIAG normal       : q_proj  179.3 | o_proj  354.2 ms (sums over 28 layers)
+DIAG q after attn : q_proj in its place  181.3 | q_proj again right after attention  370.3 | then o_proj  258.3 ms
+DIAG threads awake: q_proj  179.6 | o_proj after a 0.3 ms busy region on every thread  360.9 ms
+DIAG tasks blk.13 q_proj: 128 tasks on 16 threads, wall 5.89 ms, busy 93.0 ms (99% of wall x 16) | t0:8x0.73ms@0.00 t10:8x0.72ms@0.00 t11:8x0.73ms@0.00 t12:8x0.73ms@0.00 t13:8x0.72ms@0.00 t14:8x0.72ms@0.00 t15:8x0.73ms@0.01 t1:8x0.72ms@0.00 t2:8x0.72ms@0.00 t3:8x0.74ms@0.00 t4:8x0.73ms@0.00 t5:8x0.72ms@0.00 t6:8x0.73ms@0.01 t7:8x0.73ms@0.00 t8:8x0.73ms@0.00 t9:8x0.73ms@0.00
+DIAG tasks blk.13 o_proj: 128 tasks on 16 threads, wall 11.01 ms, busy 167.9 ms (95% of wall x 16) | t0:8x1.33ms@0.01 t10:8x1.29ms@0.00 t11:8x1.30ms@0.00 t12:8x1.30ms@0.00 t13:8x1.31ms@0.00 t14:8x1.31ms@0.00 t15:7x1.47ms@0.00 t1:8x1.30ms@0.00 t2:8x1.31ms@0.00 t3:8x1.35ms@0.00 t4:9x1.22ms@0.01 t5:8x1.31ms@0.00 t6:8x1.32ms@0.01 t7:8x1.31ms@0.01 t8:8x1.29ms@0.49 t9:8x1.31ms@0.00
+DIAG tasks blk.27 q_proj: 128 tasks on 16 threads, wall 6.11 ms, busy 90.1 ms (92% of wall x 16) | t0:8x0.71ms@0.00 t10:8x0.71ms@0.00 t11:8x0.71ms@0.00 t12:8x0.71ms@0.00 t13:8x0.71ms@0.00 t14:8x0.71ms@0.00 t15:8x0.72ms@0.00 t1:8x0.71ms@0.01 t2:8x0.71ms@0.00 t3:9x0.68ms@0.00 t4:6x0.69ms@1.94 t5:8x0.72ms@0.00 t6:8x0.71ms@0.00 t7:8x0.71ms@0.00 t8:9x0.64ms@0.00 t9:8x0.71ms@0.00
+DIAG tasks blk.27 o_proj: 128 tasks on 15 threads, wall 13.05 ms, busy 182.9 ms (88% of wall x 16) | t0:8x1.48ms@0.00 t10:8x1.54ms@0.00 t11:9x1.45ms@0.00 t12:8x1.48ms@0.00 t13:8x1.48ms@0.01 t14:9x1.45ms@0.00 t15:8x1.48ms@0.00 t1:9x1.39ms@0.00 t2:8x1.48ms@0.00 t3:8x1.48ms@0.00 t4:9x1.40ms@0.00 t5:11x1.11ms@0.00 t6:8x1.49ms@0.01 t7:9x1.40ms@0.00 t8:8x1.47ms@0.00
+test arch::qwen::layers::tests::diag_after_attention ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 278 filtered out; finished in 17.59s
