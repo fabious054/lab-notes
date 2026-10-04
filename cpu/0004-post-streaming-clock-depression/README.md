@@ -185,7 +185,8 @@ the layer. Details and raw data in
 **Practical reading for parallel code:** after a memory-bound phase, the
 next phase may run well below the clock it would get in steady state, on
 every core, for tens of milliseconds. Benchmarks that time a compute phase
-in isolation will not see it.
+in isolation will not see it. Reducing re-reads in the memory-bound phase
+(blocking for reuse) mitigates it: see finding 0001.
 
 ## Open questions
 
@@ -199,9 +200,11 @@ in isolation will not see it.
   `trigger` session (6/30 slow trials) than in the `stream` session (17/30).
 - ~~Does it happen inside the LLM engine, around attention?~~ Yes, see
   finding 0001 (2026-10-04).
-- Can the engine avoid it without changing results? Next: fewer K/V
-  passes in attention (several query rows per pass) and threads spinning
-  instead of sleeping, each measured with the same sensor.
+- ~~Can the engine avoid it without changing results?~~ Mostly, yes:
+  reading the attention's K/V once per tile of 8 rows × a GQA group cut
+  the post-attention clock drop from 15–41% to 5–13%, with bit-identical
+  results and an 11–22% faster prefill (finding 0001, section
+  "Mitigation inside the engine").
 - Other Zen 3 chips, other generations, Intel?
 
 ## Replications
