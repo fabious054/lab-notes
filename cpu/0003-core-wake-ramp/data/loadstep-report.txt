@@ -1,0 +1,81 @@
+$ ./target/release/ember.exe loadstep
+ember loadstep — all-core slowdown after a parallel phase
+tsc 3.394 GHz | 16 workers | rdpru: available (APERF/MPERF 1.368 while spinning = 4.641 GHz)
+14 configurations x 30 repetitions = 420 trials, randomized in blocks (seed 5482878640422)
+estimated time: 113 s (hard limit 120 s); the CPU will be loaded in short bursts. Ctrl+C stops cleanly.
+
+   10% (42/420 trials)
+   20% (84/420 trials)
+   30% (126/420 trials)
+   40% (168/420 trials)
+   50% (210/420 trials)
+   60% (252/420 trials)
+   70% (294/420 trials)
+   80% (336/420 trials)
+   90% (378/420 trials)
+  100% (420/420 trials)
+
+effective clock (GHz, median) by time since the next load started
+  configuration                      cells    0-0.5  0.5-1    1-2    2-3    3-5   5-10  10-15  15-25   early/late  rec95(ms)
+  uneven -> heavy                      480    3.700  4.565  4.623  4.623  4.582  4.548  4.526  4.526       1.020        1.0
+  uneven -> light                      480    3.705  4.623  4.628  4.628  4.628  4.628  4.628  4.628       0.999        1.0
+  even -> heavy                        480    4.526  4.531  4.526  4.526  4.526  4.526  4.526  4.520       1.001        0.5
+  even -> light                        480    4.526  4.531  4.623  4.628  4.628  4.628  4.628  4.628       0.994        0.5
+  rest -> heavy                        480    3.583  3.622  4.628  4.628  4.628  4.625  4.582  4.554       1.014        2.0
+  rest -> light                        480    3.583  4.087  4.628  4.628  4.628  4.628  4.628  4.628       0.999        2.0
+  steady -> heavy                      480    4.526  4.526  4.516  4.523  4.520  4.526  4.526  4.504       1.001        0.5
+  steady -> light                      480    4.526  4.548  4.623  4.628  4.628  4.628  4.628  4.628       0.994        0.5
+  uneven -> heavy, pre-spin 0.3 ms     480    3.702  4.623  4.628  4.605  4.582  4.548  4.526  4.526       1.023        1.0
+  uneven -> heavy, pre-spin 1 ms       480    4.623  4.628  4.605  4.599  4.577  4.548  4.526  4.526       1.021        0.5
+  uneven -> heavy, pre-spin 2 ms       480    4.625  4.623  4.605  4.599  4.577  4.548  4.526  4.526       1.019        0.5
+  uneven -> heavy, pre-spin 5 ms       480    4.625  4.623  4.605  4.599  4.577  4.548  4.526  4.526       1.021        0.5
+  uneven -> heavy, pre-spin 10 ms      480    4.625  4.623  4.605  4.605  4.582  4.554  4.526  4.526       1.019        0.5
+  uneven -> heavy, 1 thread/core       240    3.702  3.705  4.628  4.628  4.628  4.628  4.628  4.628       1.000        2.0
+
+same, from APERF/MPERF (true core clock)
+  uneven -> heavy                      480    3.714  4.640  4.641  4.640  4.593  4.564  4.541  4.540       1.022
+  uneven -> light                      480    3.716  4.639  4.642  4.642  4.642  4.642  4.642  4.642       1.000
+  even -> heavy                        480    4.542  4.542  4.542  4.541  4.541  4.540  4.540  4.539       1.001
+  even -> light                        480    4.542  4.546  4.640  4.642  4.642  4.642  4.642  4.642       0.994
+  rest -> heavy                        480    3.594  3.712  4.641  4.641  4.641  4.640  4.594  4.567       1.015
+  rest -> light                        480    3.595  4.091  4.641  4.642  4.642  4.642  4.642  4.642       0.999
+  steady -> heavy                      480    4.541  4.541  4.530  4.539  4.538  4.540  4.539  4.518       1.001
+  steady -> light                      480    4.541  4.565  4.640  4.642  4.642  4.642  4.642  4.642       0.994
+  uneven -> heavy, pre-spin 0.3 ms     480    3.714  4.641  4.641  4.618  4.594  4.565  4.541  4.540       1.022
+  uneven -> heavy, pre-spin 1 ms       480    4.641  4.641  4.618  4.616  4.591  4.565  4.542  4.539       1.022
+  uneven -> heavy, pre-spin 2 ms       480    4.641  4.640  4.617  4.616  4.591  4.564  4.542  4.540       1.018
+  uneven -> heavy, pre-spin 5 ms       480    4.641  4.640  4.617  4.616  4.592  4.565  4.541  4.539       1.022
+  uneven -> heavy, pre-spin 10 ms      480    4.641  4.640  4.617  4.616  4.595  4.566  4.541  4.541       1.021
+  uneven -> heavy, 1 thread/core       240    3.714  3.716  4.643  4.643  4.643  4.643  4.642  4.642       0.999
+
+issue rate, cycles per iteration (early 0-2 ms / late 15-25 ms): B = integer, V = FMA
+  uneven -> heavy                     B 10.62 / 8.96   V 8.00 / 6.61
+  uneven -> light                     B 6.07 / 6.07   V — / —
+  even -> heavy                       B 9.50 / 9.03   V 7.55 / 6.51
+  even -> light                       B 6.07 / 6.07   V — / —
+  rest -> heavy                       B 8.05 / 8.07   V 6.85 / 5.54
+  rest -> light                       B 6.07 / 6.07   V — / —
+  steady -> heavy                     B 9.51 / 8.62   V 7.52 / 5.97
+  steady -> light                     B 6.07 / 6.07   V — / —
+  uneven -> heavy, pre-spin 0.3 ms    B 10.62 / 8.94   V 7.99 / 6.48
+  uneven -> heavy, pre-spin 1 ms      B 10.17 / 8.81   V 7.97 / 6.30
+  uneven -> heavy, pre-spin 2 ms      B 10.09 / 9.02   V 7.84 / 6.65
+  uneven -> heavy, pre-spin 5 ms      B 10.09 / 8.61   V 7.94 / 6.16
+  uneven -> heavy, pre-spin 10 ms     B 10.07 / 7.66   V 7.33 / 5.29
+  uneven -> heavy, 1 thread/core      B 4.29 / 4.29   V 4.02 / 4.01
+
+idle before the next load vs slowdown (uneven arms, one point per thread per trial)
+  uneven -> heavy                     r = -0.185   early/late: idle<2ms 1.023 (n=120)  2-6ms 1.019 (n=238)  >6ms 1.018 (n=120)
+  uneven -> light                     r = -0.124   early/late: idle<2ms 1.000 (n=120)  2-6ms 0.999 (n=239)  >6ms 0.999 (n=121)
+  uneven -> heavy, pre-spin 0.3 ms    r = -0.011   early/late: idle<2ms 1.023 (n=117)  2-6ms 1.023 (n=230)  >6ms 1.023 (n=132)
+  uneven -> heavy, pre-spin 1 ms      r = -0.050   early/late: idle<2ms 1.022 (n=117)  2-6ms 1.022 (n=235)  >6ms 1.021 (n=125)
+  uneven -> heavy, pre-spin 2 ms      r = -0.029   early/late: idle<2ms 1.019 (n=119)  2-6ms 1.019 (n=236)  >6ms 1.019 (n=120)
+  uneven -> heavy, pre-spin 5 ms      r = -0.013   early/late: idle<2ms 1.021 (n=118)  2-6ms 1.021 (n=232)  >6ms 1.021 (n=121)
+  uneven -> heavy, pre-spin 10 ms     r = -0.761   early/late: idle<2ms 1.019 (n=117)  2-6ms 1.020 (n=226)  >6ms 1.019 (n=134)
+  uneven -> heavy, 1 thread/core      r = -0.165   early/late: idle<2ms 1.000 (n=60)  2-6ms 1.000 (n=120)  >6ms 1.000 (n=60)
+
+reading: early/late < 1 means the next load starts slower than it ends.
+compare uneven vs even vs rest vs steady (what triggers it), heavy vs light (load step),
+pre-spin (does keeping cores busy help), the idle correlation (per-core ramp vs chip-wide),
+and APERF/MPERF + B/V (real clock drop vs issue limit).
+per-thread, per-trial data: (local CSV, 6,480 rows; summarized in idle-vs-first-bin.csv)
