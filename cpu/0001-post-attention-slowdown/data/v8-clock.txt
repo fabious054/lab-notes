@@ -1,6 +1,6 @@
 # Round v8 (2026-10-04): core clock at five points per layer, inside the engine
 # CandleCLI `/bench 512 0 --clock` (issue #120, commit e27c9a6), fast mode, Ryzen 7 5700X.
-# Each bench below is copied verbatim; only the cargo/linker lines were removed.
+# Each bench below is copied verbatim; only the cargo/linker lines were removed and the closing border lines shortened.
 
 ## qwen3 (0.6B)
 ┌─ bench  qwen3  ·  16/4 threads (prefill/decode)  ·  3 reps  ·  0.64 GB  ·  mode fast 
@@ -46,7 +46,7 @@
 │   back-to-back           4.10 µs
 │   after 20 µs gap        8.90 µs
 │   after 200 µs gap       9.30 µs
-└──────────────────────────────────────────────────────────────────────────────────
+└─
 
 ## qwen3-1.7b
 ┌─ bench  qwen3-1.7b  ·  12/4 threads (prefill/decode)  ·  3 reps  ·  1.83 GB  ·  mode fast 
@@ -92,7 +92,7 @@
 │   back-to-back           4.30 µs
 │   after 20 µs gap        7.90 µs
 │   after 200 µs gap       5.70 µs
-└───────────────────────────────────────────────────────────────────────────────────────
+└─
 
 ## qwen3-4b
 ┌─ bench  qwen3-4b  ·  12/4 threads (prefill/decode)  ·  3 reps  ·  4.28 GB  ·  mode fast 
@@ -138,4 +138,4 @@
 │   back-to-back           4.10 µs
 │   after 20 µs gap        9.00 µs
 │   after 200 µs gap       5.70 µs
-└─────────────────────────────────────────────────────────────────────────────────────
+└─
