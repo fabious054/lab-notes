@@ -1,0 +1,10 @@
+running 1 test
+DIAG addr mod 64 blk. 0: attn input 0 | q_proj out 0 | context 0 | o_proj out 4
+DIAG addr mod 64 blk. 1: attn input 0 | q_proj out 0 | context 0 | o_proj out 0
+DIAG addr mod 64 blk.13: attn input 0 | q_proj out 0 | context 0 | o_proj out 0
+DIAG addr mod 64 blk.27: attn input 0 | q_proj out 0 | context 0 | o_proj out 0
+DIAG blk.13.attn_q       2048x2048 (16 thr):  +0B   7.45 ms  +16B   7.47 ms  +32B   6.95 ms  +48B   7.24 ms
+DIAG blk.13.attn_output  2048x2048 (16 thr):  +0B   6.98 ms  +16B   6.84 ms  +32B   6.32 ms  +48B   6.40 ms
+test arch::qwen::layers::tests::diag_output_alignment ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 277 filtered out; finished in 6.02s

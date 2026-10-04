@@ -1,0 +1,13 @@
+running 1 test
+DIAG blk. 0.attn_q       2048x2048  median    8.08 ms  ( 265.8 GMAC/s)  scales: zero 0 subnormal 0 of 131072, min |scale| 9.292364e-5
+DIAG blk. 0.attn_output  2048x2048  median    8.13 ms  ( 264.0 GMAC/s)  scales: zero 0 subnormal 0 of 131072, min |scale| 1.295805e-4
+DIAG blk. 0.ffn_down     2048x6144  median   22.90 ms  ( 281.3 GMAC/s)  scales: zero 0 subnormal 0 of 393216, min |scale| 1.4698505e-4
+DIAG blk.13.attn_q       2048x2048  median    9.02 ms  ( 238.1 GMAC/s)  scales: zero 0 subnormal 0 of 131072, min |scale| 9.775162e-5
+DIAG blk.13.attn_output  2048x2048  median    9.14 ms  ( 234.9 GMAC/s)  scales: zero 0 subnormal 0 of 131072, min |scale| 6.7055225e-5
+DIAG blk.13.ffn_down     2048x6144  median   23.54 ms  ( 273.7 GMAC/s)  scales: zero 0 subnormal 0 of 393216, min |scale| 7.939339e-5
+DIAG blk.27.attn_q       2048x2048  median    8.85 ms  ( 242.8 GMAC/s)  scales: zero 0 subnormal 0 of 131072, min |scale| 7.176399e-5
+DIAG blk.27.attn_output  2048x2048  median    9.09 ms  ( 236.2 GMAC/s)  scales: zero 0 subnormal 12 of 131072, min |scale| 3.3557415e-5
+DIAG blk.27.ffn_down     2048x6144  median   23.41 ms  ( 275.2 GMAC/s)  scales: zero 0 subnormal 0 of 393216, min |scale| 1.5187263e-4
+test arch::qwen::layers::tests::diag_oproj_vs_qproj ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 275 filtered out; finished in 0.97s

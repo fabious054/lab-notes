@@ -1,0 +1,8 @@
+running 1 test
+DIAG probe before q_proj   : integer chain median    24.2 us (worst   233.5) | FMA median    92.8 us (worst   247.9)
+DIAG probe after attention : integer chain median    43.4 us (worst   168.3) | FMA median   138.8 us (worst   337.9)
+DIAG probe after o_proj    : integer chain median    35.9 us (worst   293.6) | FMA median   108.0 us (worst   207.5)
+DIAG o_proj in this pass: 318.0 ms over 28 layers (q_proj 209.3 ms)
+test arch::qwen::layers::tests::diag_cpu_probe ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 279 filtered out; finished in 9.11s
