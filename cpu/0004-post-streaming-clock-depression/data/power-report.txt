@@ -1,0 +1,100 @@
+$ ./target/release/ember loadstep --set power
+ember loadstep — all-core slowdown after a parallel phase
+set: power (realistic loads: streaming phase, int8/f32 work on random data)
+tsc 3.394 GHz | 16 workers | rdpru: available (APERF/MPERF 1.368 while spinning = 4.641 GHz)
+memory: 96 MB of streaming buffers (6 MB per worker)
+13 configurations x 30 repetitions = 390 trials, randomized in blocks (seed 12891966636073)
+estimated time: 107 s (hard limit 120 s); the CPU will be loaded in short bursts. Ctrl+C stops cleanly.
+
+   10% (39/390 trials)
+   20% (78/390 trials)
+   30% (117/390 trials)
+   40% (156/390 trials)
+   50% (195/390 trials)
+   60% (234/390 trials)
+   70% (273/390 trials)
+   80% (312/390 trials)
+   90% (351/390 trials)
+  100% (390/390 trials)
+
+effective clock (GHz, median) by time since the next load started
+  configuration                        cells    0-0.5  0.5-1    1-2    2-3    3-5   5-10  10-15  15-25  rec95(ms)
+  stream uneven -> int8                  480    3.877  3.877  4.026  4.030  4.030  4.127  4.107  4.052        0.5
+  stream even -> int8                    480    4.617  4.611  4.498  4.401  4.286  4.125  4.057  4.052        0.5
+  stream uneven -> int8, pre-spin 2 ms   480    4.102  4.102  4.107  4.130  4.232  4.153  4.064  4.035        0.5
+  stream uneven -> light                 480    3.663  3.997  4.253  4.254  4.254  4.482  4.628  4.628       10.0
+  int8 uneven -> int8                    480    3.702  4.498  4.504  4.423  4.259  4.093  4.035  4.043        1.0
+  rest -> int8                           480    3.579  3.694  4.620  4.571  4.476  4.269  4.107  4.079        2.0
+  stream uneven -> int8, 1 thread/core   240    1.672  1.294  1.238  1.209  1.181  1.237  1.526  2.166       25.0
+  stream uneven -> fma-hot               480    3.426  3.481  4.084  4.110  4.166  4.230  4.239  4.172        2.0
+  rest -> fma-hot                        480    3.581  4.543  4.611  4.602  4.565  4.432  4.286  4.210        1.0
+  int8 steady -> int8                    480    3.950  3.974  3.982  4.004  4.026  4.048  4.048  4.030        0.5
+  fma-hot steady -> fma-hot              480    4.002  4.008  4.019  4.028  4.048  4.085  4.120  4.125        0.5
+  light steady -> light                  480    4.628  4.625  4.628  4.628  4.628  4.628  4.628  4.628        0.5
+  int8 steady -> int8, 1 thread/core     240    4.030  4.043  4.084  4.134  4.162  4.205  4.205  4.205        0.5
+
+same, from APERF/MPERF (true core clock)
+  stream uneven -> int8                  480    3.893  3.893  4.042  4.043  4.043  4.142  4.141  4.068
+  stream even -> int8                    480    4.640  4.637  4.516  4.418  4.313  4.142  4.068  4.067
+  stream uneven -> int8, pre-spin 2 ms   480    4.118  4.118  4.119  4.143  4.244  4.168  4.080  4.046
+  stream uneven -> light                 480    3.673  3.999  4.266  4.266  4.275  4.492  4.641  4.642
+  int8 uneven -> int8                    480    3.714  4.517  4.519  4.440  4.269  4.115  4.055  4.065
+  rest -> int8                           480    3.594  3.713  4.639  4.591  4.494  4.290  4.119  4.093
+  stream uneven -> int8, 1 thread/core   240    1.677  1.298  1.241  1.212  1.184  1.255  1.531  2.171
+  stream uneven -> fma-hot               480    3.513  3.493  4.095  4.131  4.190  4.267  4.265  4.193
+  rest -> fma-hot                        480    3.594  4.593  4.641  4.639  4.612  4.445  4.312  4.232
+  int8 steady -> int8                    480    3.968  3.992  3.995  4.018  4.042  4.066  4.066  4.044
+  fma-hot steady -> fma-hot              480    4.019  4.041  4.042  4.043  4.067  4.114  4.141  4.142
+  light steady -> light                  480    4.642  4.641  4.642  4.642  4.642  4.642  4.642  4.642
+  int8 steady -> int8, 1 thread/core     240    4.043  4.064  4.095  4.144  4.181  4.217  4.218  4.218
+
+against the steady arm with the same next load (1.000 = no change)
+  configuration                             dip   2-10 ms   lost µs  baseline
+  stream uneven -> int8                   0.982     1.013      -224  int8 steady -> int8
+  stream even -> int8                     1.169     1.040      -684  int8 steady -> int8
+  stream uneven -> int8, pre-spin 2 ms    1.038     1.033      -361  int8 steady -> int8
+  stream uneven -> light                  0.791     0.950       654  light steady -> light
+  int8 uneven -> int8                     0.937     1.034      -458  int8 steady -> int8
+  rest -> int8                            0.906     1.080      -911  int8 steady -> int8
+  stream uneven -> int8, 1 thread/core    0.415     0.291     15034  int8 steady -> int8, 1 thread/core
+  stream uneven -> fma-hot                0.856     1.032      -392  fma-hot steady -> fma-hot
+  rest -> fma-hot                         0.895     1.103     -1391  fma-hot steady -> fma-hot
+  int8 steady -> int8                     1.000     1.000         0  (is the baseline)
+  fma-hot steady -> fma-hot               1.000     1.000         0  (is the baseline)
+  light steady -> light                   1.000     1.000         0  (is the baseline)
+  int8 steady -> int8, 1 thread/core      1.000     1.000         0  (is the baseline)
+
+issue rate, cycles per iteration (early 0-2 ms / late 15-25 ms): B = integer, V = FMA
+  stream uneven -> int8                 B 7.99 / 7.94   V 6.21 / 5.30
+  stream even -> int8                   B 8.61 / 7.81   V 6.24 / 5.16
+  stream uneven -> int8, pre-spin 2 ms  B 7.98 / 7.95   V 6.17 / 5.45
+  stream uneven -> light                B 6.07 / 6.07   V — / —
+  int8 uneven -> int8                   B 9.13 / 7.93   V 6.59 / 5.35
+  rest -> int8                          B 8.02 / 7.39   V 6.20 / 5.10
+  stream uneven -> int8, 1 thread/core  B 4.29 / 4.29   V 4.01 / 4.01
+  stream uneven -> fma-hot              B 8.19 / 8.06   V 6.94 / 5.74
+  rest -> fma-hot                       B 9.49 / 7.89   V 7.33 / 4.98
+  int8 steady -> int8                   B 7.97 / 7.94   V 6.18 / 5.39
+  fma-hot steady -> fma-hot             B 7.99 / 8.00   V 6.56 / 5.24
+  light steady -> light                 B 6.07 / 6.07   V — / —
+  int8 steady -> int8, 1 thread/core    B 4.29 / 4.29   V 4.01 / 4.01
+
+per thread: idle at the barrier vs clock in the first 0.5 ms / over 2-10 ms (GHz, median; n)
+  configuration                                   0-0.05 ms            0.05-1 ms               1-2 ms               2-4 ms               4-8 ms               >=8 ms
+  stream uneven -> int8                    4.15 / 4.10 (29)     4.16 / 4.11 (31)     4.09 / 4.10 (61)    3.54 / 4.10 (125)    3.58 / 4.07 (205)     3.46 / 4.06 (29)
+  stream even -> int8                      4.62 / 4.20 (40)    4.62 / 4.16 (245)    4.61 / 4.18 (149)     3.70 / 4.18 (43)         — / 4.13 (3)                    —
+  stream uneven -> int8, pre-spin 2 ms     4.10 / 4.21 (27)     4.12 / 4.21 (35)     4.12 / 4.21 (62)    4.10 / 4.21 (122)    4.10 / 4.21 (205)     4.09 / 4.19 (29)
+  stream uneven -> light                   4.32 / 4.35 (25)     4.30 / 4.29 (36)     4.16 / 4.35 (61)    3.56 / 4.43 (129)    3.54 / 4.42 (196)     3.54 / 4.32 (33)
+  int8 uneven -> int8                      4.61 / 4.15 (28)     4.60 / 4.15 (32)     4.51 / 4.15 (60)    3.70 / 4.15 (118)    3.70 / 4.15 (212)     3.70 / 4.14 (30)
+  stream uneven -> int8, 1 thread/core      2.95 / 2.72 (2)     1.67 / 1.19 (28)     1.75 / 1.20 (29)     1.67 / 1.20 (60)     1.74 / 1.21 (90)     1.67 / 1.22 (31)
+  stream uneven -> fma-hot                 4.20 / 4.26 (27)     4.16 / 4.16 (34)     3.70 / 4.22 (60)    3.41 / 4.20 (124)    3.34 / 4.23 (206)     3.35 / 4.20 (29)
+
+reading:
+  dip < 1: the first 0.5 ms run slower than steady state (per-core wake-up ramp, finding 0003).
+  2-10 ms < 1: a sustained slowdown, the signature of finding 0001; check it in the threads that
+  did NOT sleep (idle < 1 ms): a per-core ramp cannot slow them, a chip-wide current limit can.
+  compare the pattern with: even (no idle tail), pre-spin 2 ms (no wake-up dip), -> light (no load step),
+  rest -> int8 (load step from idle), 1 thread/core (no SMT); and the steady clock of each load.
+  APERF/MPERF and B/V tell a real clock drop from an issue limit.
+
+per-thread, per-trial data: (local CSV, 5,760 rows; per-trial summary in trial-summary.csv)
