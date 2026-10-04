@@ -18,7 +18,7 @@ rights and no driver?** We found no source that answers this.
 | Item | Value |
 |---|---|
 | CPU | AMD Ryzen 7 5700X (Zen 3), 8 cores / 16 threads |
-| OS | Windows (exact build and virtualization-based security state not recorded) |
+| OS | Windows; Core isolation → Memory Integrity **off** (exact build not recorded) |
 | Privileges | Normal user, no admin, no driver |
 | Toolchain | Rust, MSVC, release build |
 | Tool | Ember (CPU lab, private for now): `ember __rdpru-sample` and `ember sensor` |
@@ -92,8 +92,8 @@ thread on one core for the whole interval.
 
 ## Conclusion
 
-**Supported by the data:** on this Windows machine, `RDPRU` runs from user
-mode with no admin rights and no driver, and APERF/MPERF are real (not
+**Supported by the data:** on this Windows machine (Memory Integrity off),
+`RDPRU` runs from user mode with no admin rights and no driver, and APERF/MPERF are real (not
 zero, not virtualized copies). The true core clock they give agrees with an
 independent instruction-timing measurement within 0.3%.
 
@@ -103,9 +103,9 @@ reading these registers normally requires on Windows.
 
 ## Open questions
 
-- Does it hold with virtualization-based security / Memory Integrity on?
-  This machine's state was not recorded. Under Hyper-V the counters could
-  be intercepted or virtualized.
+- Does it hold with Memory Integrity (HVCI) on? It was **off** on this
+  machine. With it on, Windows runs on the Hyper-V layer, which could
+  intercept or virtualize the counters; untested.
 - Which Windows builds? Zen 2 and Zen 4/5 parts?
 - Intel CPUs do not implement `RDPRU`; there is no equivalent user-mode
   path there.
