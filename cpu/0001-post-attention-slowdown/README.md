@@ -1,6 +1,6 @@
 # 0001 — Cores run 1.5–1.8× slower for ~10 ms after an unevenly ending parallel phase
 
-**Status:** single machine — mechanism confirmed inside the engine (2026-10-04, see [below](#confirmation-inside-the-engine-2026-10-04)); explained by [finding 0004](../0004-post-streaming-clock-depression/)
+**Status:** single machine — mechanism confirmed inside the engine and mitigated (2026-10-04, see [confirmation](#confirmation-inside-the-engine-2026-10-04) and [mitigation](#mitigation-inside-the-engine-kv-tiles-2026-10-04)); explained by [finding 0004](../0004-post-streaming-clock-depression/)
 **Area:** cpu
 **Date:** 2026-10-03
 
@@ -105,7 +105,11 @@ streaming reads, which the next phase inherits for ~10 ms
 A clock sensor inside the engine then confirmed it: the effective clock
 of every pool thread falls right after attention, as low as 0.54–0.59
 GHz on Qwen3-1.7B, and is back by the end of the layer
-([confirmation](#confirmation-inside-the-engine-2026-10-04)).
+([confirmation](#confirmation-inside-the-engine-2026-10-04)). Reading
+the attention's K/V far less often removed most of it, with
+bit-identical results: prefill 11–22% faster, and `o_proj` back to the
+time its shape predicts
+([mitigation](#mitigation-inside-the-engine-kv-tiles-2026-10-04)).
 
 I did not find this documented for Zen 3. The closest documented case
 is on Zen 5, where heavy vector load limits throughput for a similar
@@ -120,11 +124,11 @@ time scale.
   the in-engine sensor is a dependent-add chain timed with the TSC, which
   instruction-per-cycle limits on memory cannot slow, and in the
   synthetic tests it agreed with APERF/MPERF within ~0.3%.
-- Why is Qwen3-1.7B hit so much harder (0.14× of the pre-attention clock)
-  than 0.6B (0.86×) and 4B (0.67×)? Not explained yet. 0.6B and 1.7B have
-  the same attention shape (16 query heads, 8 K/V heads, head_dim 128),
-  but in these runs 0.6B used 16 threads and 1.7B used 12. A rerun of
-  1.7B on 16 threads is the first thing to check.
+- Why was Qwen3-1.7B hit so much harder? Partly answered: on 12 threads
+  the clock after attention fell to 0.14× of the pre-attention clock, on
+  16 threads to 0.59× (0.6B: 0.85×, same attention shape). Why 12 threads
+  make it so much worse, and why 1.7B still drops more than 0.6B at 16,
+  is not measured.
 - Does it happen on other Zen 3 chips, other generations, Intel?
 - Balancing the attention work (finer tasks, shorter idle tail) cut the
   `o_proj` time by 19% on the smaller Qwen3-0.6B, but left it unchanged
@@ -210,6 +214,51 @@ Caveat: each sample is a `rayon::broadcast`, so it wakes every worker and
 is itself a synchronization point. It reads the clock a worker has when
 the next phase would start, which is what that phase pays; it does not
 read the clock of a core that stays asleep.
+
+## Mitigation inside the engine: K/V tiles (2026-10-04)
+
+In the attention phase, every (query row, head) pair streamed that
+head's whole visible K/V history: up to ~512 KB per row at 512 tokens on
+Qwen3-0.6B/1.7B, the size of a whole L2. Consecutive rows, and the query
+heads that share one K/V head (2 on 1.7B, 4 on 4B), re-read the same
+K/V from L2/L3, the fast L3 streaming finding 0004 identified as the
+strongest trigger. CandleCLI issue #122 (PR #123) changed the attention
+so that one pass over K/V serves a tile of R query rows × all heads
+sharing that K/V head: each key and value row is loaded once per tile,
+cutting K/V reads by R × heads-per-group. Every output keeps the same
+operations in the same order, so results are bit-identical (tested, and
+the engine's precision check is identical to the build before).
+
+First, the thread count mattered: the engine's saved prefill thread
+count for 1.7B was 12 from an older build. On 16 threads (no other
+change) the clock right after attention went from 0.59 to 2.44 GHz, and
+pp512 from 152 to 175 tok/s; `o_proj` still ran at ~2.5 GHz.
+
+Then the tiles, same binary, only the rows per K/V pass changed, ~2
+minutes idle before each run, 1.7B alternated 1 → 4 → 8 → 1. Raw
+extract: [`data/v9-kv-tiles.txt`](data/v9-kv-tiles.txt).
+
+| Model (16 threads) | pp512 tok/s, 1 → 4 → 8 rows | Attention ms | `o_proj` ms | Clock right after attention ÷ before Q/K/V |
+|---|---|---|---|---|
+| Qwen3-0.6B | 419.7 → 487.7 → **512.4** (+22%) | 320 → 159 → 155 | 135 → 118 → 110 | 0.85 → 0.94 → 0.95 |
+| Qwen3-1.7B | 173.5 / 172.6 → 204.3 → **206.6** (+19%) | 387 → 158 → 152 | 331 → 206 → 198 | 0.59 → 0.93 → 0.92 |
+| Qwen3-4B | 73.6 → **82.2** → 82.0 (+12%) | 1099 → 355 → 373 | 669 → 611 → 612 | 0.61 → 0.88 → 0.87 |
+
+- **The clock drop after attention shrank from 15–41% to 5–13%**, and on
+  1.7B the clock after `o_proj` went from ~2.5 to ~3.9 GHz.
+- **`o_proj` lost its excess:** 198 ms on 1.7B, the time of `q_proj`, which
+  has the same 2048×2048 shape (~205 ms). That was this finding's original
+  question.
+- Part of the gain is simply less work (the attention itself reads far
+  less), and part is the clock: `o_proj` does the same work as before and
+  got 40% faster on 1.7B.
+- The two 1-row runs on 1.7B, before and after the tiled runs, agree
+  (173.5 and 172.6), so the gain is not drift.
+
+**Practical reading:** when a parallel phase re-reads a working set that
+fits in L2/L3, restructuring it so that each pass serves more work, i.e.
+blocking for reuse, does not only save that phase's time. On this Zen 3
+it also keeps the whole chip's clock up for the phase after it.
 
 ## Replications
 

@@ -1,0 +1,154 @@
+# Round v9 (2026-10-04): K/V tiles in prefill attention (CandleCLI issue #122, PR #123)
+# `/bench 512 0 --clock`, fast mode, 16 threads, Ryzen 7 5700X; only CANDLECLI_ATTN_ROWS changes between runs.
+# Extract: for each run, the header and the pp512, attention core, o proj and core clock lines, verbatim.
+# Run order: 1.7B (1, 4, 8, 1), 0.6B (1, 4, 8), 4B (1, 4, 8), each after a ~2 min idle pause.
+
+## CANDLECLI_ATTN_ROWS = unset (1 row)
+┌─ bench  qwen3-1.7b  ·  16/4 threads (prefill/decode)  ·  3 reps  ·  1.83 GB  ·  mode fast
+│ pp512       173.46 ± 5.45    tok/s   (2953.7 ms)
+│   attention core      387.341   13.1%
+│   o proj              331.509   11.2%
+│ core clock — prefill (GHz, every pool thread, TSC 3.394 GHz):
+│   point              median             IQR     p10  readings
+│   before q/k/v         4.10    4.03 – 4.20     3.96      1344
+│   before attention     4.07    3.98 – 4.21     3.93      1344
+│   after attention      2.42    2.35 – 2.49     2.26      1344
+│   after o proj         2.50    2.42 – 2.56     2.38      1344
+│   after mlp            3.95    3.86 – 4.03     3.82      1344
+│   after attention vs before q/k/v: 0.590 (-41.0%)
+│   sensor overhead: 41.97 ms (0.47% of prefill)
+
+## CANDLECLI_ATTN_ROWS = 4
+┌─ bench  qwen3-1.7b  ·  16/4 threads (prefill/decode)  ·  3 reps  ·  1.83 GB  ·  mode fast
+│ pp512       204.32 ± 9.10    tok/s   (2509.2 ms)
+│   attention core      157.817    6.3%
+│   o proj              205.930    8.2%
+│ core clock — prefill (GHz, every pool thread, TSC 3.394 GHz):
+│   point              median             IQR     p10  readings
+│   before q/k/v         4.09    4.03 – 4.19     3.88      1344
+│   before attention     4.05    3.98 – 4.16     3.93      1344
+│   after attention      3.81    3.75 – 3.87     3.71      1344
+│   after o proj         3.83    3.58 – 3.91     3.37      1344
+│   after mlp            3.96    3.87 – 4.05     3.83      1344
+│   after attention vs before q/k/v: 0.930 (-7.0%)
+│   sensor overhead: 27.91 ms (0.37% of prefill)
+
+## CANDLECLI_ATTN_ROWS = 8
+┌─ bench  qwen3-1.7b  ·  16/4 threads (prefill/decode)  ·  3 reps  ·  1.83 GB  ·  mode fast
+│ pp512       206.60 ± 5.54    tok/s   (2479.4 ms)
+│   attention core      152.245    6.1%
+│   o proj              197.697    8.0%
+│ core clock — prefill (GHz, every pool thread, TSC 3.394 GHz):
+│   point              median             IQR     p10  readings
+│   before q/k/v         4.10    4.05 – 4.18     3.95      1344
+│   before attention     4.04    3.96 – 4.13     3.92      1344
+│   after attention      3.78    3.72 – 3.83     3.68      1344
+│   after o proj         3.91    3.89 – 3.93     3.87      1344
+│   after mlp            3.96    3.86 – 4.05     3.81      1344
+│   after attention vs before q/k/v: 0.921 (-7.9%)
+│   sensor overhead: 30.37 ms (0.41% of prefill)
+
+## CANDLECLI_ATTN_ROWS = unset (1 row), rerun
+┌─ bench  qwen3-1.7b  ·  16/4 threads (prefill/decode)  ·  3 reps  ·  1.83 GB  ·  mode fast
+│ pp512       172.60 ± 4.10    tok/s   (2967.6 ms)
+│   attention core      393.283   13.3%
+│   o proj              330.946   11.2%
+│ core clock — prefill (GHz, every pool thread, TSC 3.394 GHz):
+│   point              median             IQR     p10  readings
+│   before q/k/v         4.12    4.05 – 4.22     3.95      1344
+│   before attention     4.08    4.00 – 4.23     3.95      1344
+│   after attention      2.40    2.33 – 2.47     2.24      1344
+│   after o proj         2.52    2.45 – 2.59     2.41      1344
+│   after mlp            3.95    3.87 – 4.02     3.83      1344
+│   after attention vs before q/k/v: 0.582 (-41.8%)
+│   sensor overhead: 41.55 ms (0.47% of prefill)
+
+## CANDLECLI_ATTN_ROWS = unset (1 row)
+┌─ bench  qwen3  ·  16/4 threads (prefill/decode)  ·  3 reps  ·  0.64 GB  ·  mode fast
+│ pp512       419.70 ± 27.62   tok/s   (1223.6 ms)
+│   attention core      320.020   26.2%
+│   o proj              135.199   11.0%
+│ core clock — prefill (GHz, every pool thread, TSC 3.394 GHz):
+│   point              median             IQR     p10  readings
+│   before q/k/v         4.15    4.03 – 4.27     3.94      1344
+│   before attention     4.08    3.98 – 4.24     3.94      1344
+│   after attention      3.53    3.20 – 3.60     2.92      1344
+│   after o proj         3.46    2.99 – 3.71     2.75      1344
+│   after mlp            4.07    3.95 – 4.21     3.90      1344
+│   after attention vs before q/k/v: 0.849 (-15.1%)
+│   sensor overhead: 31.18 ms (0.85% of prefill)
+
+## CANDLECLI_ATTN_ROWS = 4
+┌─ bench  qwen3  ·  16/4 threads (prefill/decode)  ·  3 reps  ·  0.64 GB  ·  mode fast
+│ pp512       487.67 ± 25.40   tok/s   (1051.8 ms)
+│   attention core      159.365   15.2%
+│   o proj              118.159   11.2%
+│ core clock — prefill (GHz, every pool thread, TSC 3.394 GHz):
+│   point              median             IQR     p10  readings
+│   before q/k/v         4.00    3.91 – 4.11     3.88      1344
+│   before attention     4.07    3.97 – 4.24     3.92      1344
+│   after attention      3.75    3.71 – 3.81     3.67      1344
+│   after o proj         3.84    3.78 – 3.89     3.60      1344
+│   after mlp            3.93    3.88 – 4.05     3.85      1344
+│   after attention vs before q/k/v: 0.940 (-6.0%)
+│   sensor overhead: 30.91 ms (0.98% of prefill)
+
+## CANDLECLI_ATTN_ROWS = 8
+┌─ bench  qwen3  ·  16/4 threads (prefill/decode)  ·  3 reps  ·  0.64 GB  ·  mode fast
+│ pp512       512.41 ± 26.63   tok/s   (1001.0 ms)
+│   attention core      154.996   15.5%
+│   o proj              110.324   11.0%
+│ core clock — prefill (GHz, every pool thread, TSC 3.394 GHz):
+│   point              median             IQR     p10  readings
+│   before q/k/v         3.97    3.90 – 4.08     3.88      1344
+│   before attention     4.10    3.95 – 4.25     3.90      1344
+│   after attention      3.76    3.70 – 3.83     3.65      1344
+│   after o proj         3.89    3.86 – 3.92     3.82      1344
+│   after mlp            3.91    3.88 – 3.97     3.85      1344
+│   after attention vs before q/k/v: 0.948 (-5.2%)
+│   sensor overhead: 28.40 ms (0.95% of prefill)
+
+## CANDLECLI_ATTN_ROWS = unset (1 row)
+┌─ bench  qwen3-4b  ·  16/4 threads (prefill/decode)  ·  3 reps  ·  4.28 GB  ·  mode fast
+│ pp512        73.61 ± 1.18    tok/s   (6957.2 ms)
+│   attention core     1099.100   15.8%
+│   o proj              669.305    9.6%
+│ core clock — prefill (GHz, every pool thread, TSC 3.394 GHz):
+│   point              median             IQR     p10  readings
+│   before q/k/v         4.24    4.15 – 4.35     3.95      1728
+│   before attention     4.10    4.01 – 4.19     3.94      1728
+│   after attention      2.59    2.51 – 2.72     2.36      1728
+│   after o proj         4.25    4.12 – 4.34     3.97      1728
+│   after mlp            4.03    3.95 – 4.12     3.41      1728
+│   after attention vs before q/k/v: 0.610 (-39.0%)
+│   sensor overhead: 44.75 ms (0.21% of prefill)
+
+## CANDLECLI_ATTN_ROWS = 4
+┌─ bench  qwen3-4b  ·  16/4 threads (prefill/decode)  ·  3 reps  ·  4.28 GB  ·  mode fast
+│ pp512        82.22 ± 0.86    tok/s   (6227.7 ms)
+│   attention core      354.666    5.7%
+│   o proj              610.849    9.8%
+│ core clock — prefill (GHz, every pool thread, TSC 3.394 GHz):
+│   point              median             IQR     p10  readings
+│   before q/k/v         4.20    4.13 – 4.29     3.94      1728
+│   before attention     4.05    3.99 – 4.15     3.94      1728
+│   after attention      3.69    3.65 – 3.74     3.62      1728
+│   after o proj         3.89    3.85 – 3.97     3.81      1728
+│   after mlp            4.00    3.92 – 4.07     3.47      1728
+│   after attention vs before q/k/v: 0.878 (-12.2%)
+│   sensor overhead: 40.45 ms (0.22% of prefill)
+
+## CANDLECLI_ATTN_ROWS = 8
+┌─ bench  qwen3-4b  ·  16/4 threads (prefill/decode)  ·  3 reps  ·  4.28 GB  ·  mode fast
+│ pp512        81.97 ± 2.98    tok/s   (6252.1 ms)
+│   attention core      372.540    6.0%
+│   o proj              612.287    9.8%
+│ core clock — prefill (GHz, every pool thread, TSC 3.394 GHz):
+│   point              median             IQR     p10  readings
+│   before q/k/v         4.19    4.12 – 4.27     4.03      1728
+│   before attention     4.03    3.95 – 4.18     3.90      1728
+│   after attention      3.66    3.63 – 3.71     3.59      1728
+│   after o proj         3.90    3.84 – 4.00     3.81      1728
+│   after mlp            4.00    3.91 – 4.07     3.52      1728
+│   after attention vs before q/k/v: 0.873 (-12.7%)
+│   sensor overhead: 36.69 ms (0.20% of prefill)
