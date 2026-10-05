@@ -1,6 +1,6 @@
 # 0001 — Cores run 1.5–1.8× slower for ~10 ms after an unevenly ending parallel phase
 
-**Status:** single machine — mechanism confirmed inside the engine and mitigated (2026-10-04, see [confirmation](#confirmation-inside-the-engine-2026-10-04) and [mitigation](#mitigation-inside-the-engine-kv-tiles-2026-10-04)); explained by [finding 0004](../0004-post-streaming-clock-depression/)
+**Status:** single machine — mechanism confirmed inside the engine and mitigated (2026-10-04, see [confirmation](#confirmation-inside-the-engine-2026-10-04) and [mitigation](#mitigation-inside-the-engine-2026-10-04)); explained by [finding 0004](../0004-post-streaming-clock-depression/)
 **Area:** cpu
 **Date:** 2026-10-03
 
@@ -109,7 +109,7 @@ GHz on Qwen3-1.7B, and is back by the end of the layer
 the attention's K/V far less often removed most of it, with
 bit-identical results: prefill 11–22% faster, and `o_proj` back to the
 time its shape predicts
-([mitigation](#mitigation-inside-the-engine-kv-tiles-2026-10-04)).
+([mitigation](#mitigation-inside-the-engine-2026-10-04)).
 
 I did not find this documented for Zen 3. The closest documented case
 is on Zen 5, where heavy vector load limits throughput for a similar
@@ -177,7 +177,7 @@ Measured inside the engine on 2026-10-04: see the next section.
 
 ## Confirmation inside the engine (2026-10-04)
 
-CandleCLI's `/bench 512 0 --clock` (issue #120) runs a ~8 µs clock sensor
+CandleCLI's `/bench 512 0 --clock` (the engine is private for now) runs a ~8 µs clock sensor
 on **every thread of the pool** at five points of every layer during a
 512-token prefill: one dependent integer add per cycle, timed with the
 TSC, no memory access (the same method as Ember's sensor). Fast (int8)
@@ -215,30 +215,31 @@ is itself a synchronization point. It reads the clock a worker has when
 the next phase would start, which is what that phase pays; it does not
 read the clock of a core that stays asleep.
 
-## Mitigation inside the engine: K/V tiles (2026-10-04)
+## Mitigation inside the engine (2026-10-04)
 
 In the attention phase, every (query row, head) pair streamed that
 head's whole visible K/V history: up to ~512 KB per row at 512 tokens on
 Qwen3-0.6B/1.7B, the size of a whole L2. Consecutive rows, and the query
 heads that share one K/V head (2 on 1.7B, 4 on 4B), re-read the same
 K/V from L2/L3, the fast L3 streaming finding 0004 identified as the
-strongest trigger. CandleCLI issue #122 (PR #123) changed the attention
-so that one pass over K/V serves a tile of R query rows × all heads
-sharing that K/V head: each key and value row is loaded once per tile,
-cutting K/V reads by R × heads-per-group. Every output keeps the same
-operations in the same order, so results are bit-identical (tested, and
-the engine's precision check is identical to the build before).
+strongest trigger. The engine then changed how its attention walks K/V
+so that each key and value row is read far fewer times (blocking for
+reuse; the details stay private, see [What is published](../../README.md#what-is-and-is-not-published-here)).
+Every output keeps the same operations in the same order, so results
+are bit-identical (tested, and the engine's precision check is
+identical to the build before).
 
 First, the thread count mattered: the engine's saved prefill thread
 count for 1.7B was 12 from an older build. On 16 threads (no other
 change) the clock right after attention went from 0.59 to 2.44 GHz, and
 pp512 from 152 to 175 tok/s; `o_proj` still ran at ~2.5 GHz.
 
-Then the tiles, same binary, only the rows per K/V pass changed, ~2
-minutes idle before each run, 1.7B alternated 1 → 4 → 8 → 1. Raw
-extract: [`data/v9-kv-tiles.txt`](data/v9-kv-tiles.txt).
+Then the new attention, same binary, switched by an engine setting: the
+old layout (A), an intermediate setting (B) and the default one (C),
+~2 minutes idle before each run, 1.7B alternated A → B → C → A. Raw
+extract: [`data/v9-attention.txt`](data/v9-attention.txt).
 
-| Model (16 threads) | pp512 tok/s, 1 → 4 → 8 rows | Attention ms | `o_proj` ms | Clock right after attention ÷ before Q/K/V |
+| Model (16 threads) | pp512 tok/s, A → B → C | Attention ms | `o_proj` ms | Clock right after attention ÷ before Q/K/V |
 |---|---|---|---|---|
 | Qwen3-0.6B | 419.7 → 487.7 → **512.4** (+22%) | 320 → 159 → 155 | 135 → 118 → 110 | 0.85 → 0.94 → 0.95 |
 | Qwen3-1.7B | 173.5 / 172.6 → 204.3 → **206.6** (+19%) | 387 → 158 → 152 | 331 → 206 → 198 | 0.59 → 0.93 → 0.92 |
@@ -252,7 +253,7 @@ extract: [`data/v9-kv-tiles.txt`](data/v9-kv-tiles.txt).
 - Part of the gain is simply less work (the attention itself reads far
   less), and part is the clock: `o_proj` does the same work as before and
   got 40% faster on 1.7B.
-- The two 1-row runs on 1.7B, before and after the tiled runs, agree
+- The two runs of the old layout on 1.7B, before and after the new ones, agree
   (173.5 and 172.6), so the gain is not drift.
 
 **Practical reading:** when a parallel phase re-reads a working set that

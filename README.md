@@ -14,7 +14,7 @@ By [Fabio Henrique](https://github.com/fabious054) (CodeWave.IT).
 | Folder | What goes there |
 |---|---|
 | [`cpu/`](cpu/) | Hardware behaviour: clocks, caches, cores, power management, measurement pitfalls |
-| [`inference/`](inference/) | Results of [CandleCLI](https://github.com/fabious054/CandleCLI), a CPU LLM inference engine written from scratch in pure Rust, measured against other tools |
+| [`inference/`](inference/) | Results of CandleCLI (private for now), a CPU LLM inference engine written from scratch in pure Rust, measured against other tools |
 
 ## Findings
 
@@ -46,6 +46,13 @@ the exact command used for the other tool, raw numbers); implementation
 details of the engine are not.
 
 ## Run it on your machine
+
+The CPU findings are measured with Ember, my CPU lab, which is private
+for now; a public release is planned, and with it a ready-to-run probe
+for each finding. Until then, some findings include the probe code
+itself (for example [0001](cpu/0001-post-attention-slowdown/probe.rs)
+and [0002](cpu/0002-rdpru-user-mode-windows/rdpru.rs)), and every
+finding describes its protocol in enough detail to write your own.
 
 If you reproduce a finding, or fail to, open an issue with the
 "Replication" template. A result that disagrees is as useful as one that

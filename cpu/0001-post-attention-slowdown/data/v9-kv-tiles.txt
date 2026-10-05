@@ -1,9 +1,9 @@
-# Round v9 (2026-10-04): K/V tiles in prefill attention (CandleCLI issue #122, PR #123)
-# `/bench 512 0 --clock`, fast mode, 16 threads, Ryzen 7 5700X; only CANDLECLI_ATTN_ROWS changes between runs.
+# Round v9 (2026-10-04): old vs new prefill attention layout (CandleCLI, engine private for now)
+# `/bench 512 0 --clock`, fast mode, 16 threads, Ryzen 7 5700X; only an engine setting for the attention layout changes between runs: A = old layout, B = intermediate setting, C = default setting.
 # Extract: for each run, the header and the pp512, attention core, o proj and core clock lines, verbatim.
-# Run order: 1.7B (1, 4, 8, 1), 0.6B (1, 4, 8), 4B (1, 4, 8), each after a ~2 min idle pause.
+# Run order: 1.7B (A, B, C, A), 0.6B (A, B, C), 4B (A, B, C), each after a ~2 min idle pause. Section titles are annotations.
 
-## CANDLECLI_ATTN_ROWS = unset (1 row)
+## A (old layout)
 ┌─ bench  qwen3-1.7b  ·  16/4 threads (prefill/decode)  ·  3 reps  ·  1.83 GB  ·  mode fast
 │ pp512       173.46 ± 5.45    tok/s   (2953.7 ms)
 │   attention core      387.341   13.1%
@@ -18,7 +18,7 @@
 │   after attention vs before q/k/v: 0.590 (-41.0%)
 │   sensor overhead: 41.97 ms (0.47% of prefill)
 
-## CANDLECLI_ATTN_ROWS = 4
+## B (intermediate setting)
 ┌─ bench  qwen3-1.7b  ·  16/4 threads (prefill/decode)  ·  3 reps  ·  1.83 GB  ·  mode fast
 │ pp512       204.32 ± 9.10    tok/s   (2509.2 ms)
 │   attention core      157.817    6.3%
@@ -33,7 +33,7 @@
 │   after attention vs before q/k/v: 0.930 (-7.0%)
 │   sensor overhead: 27.91 ms (0.37% of prefill)
 
-## CANDLECLI_ATTN_ROWS = 8
+## C (default setting)
 ┌─ bench  qwen3-1.7b  ·  16/4 threads (prefill/decode)  ·  3 reps  ·  1.83 GB  ·  mode fast
 │ pp512       206.60 ± 5.54    tok/s   (2479.4 ms)
 │   attention core      152.245    6.1%
@@ -48,7 +48,7 @@
 │   after attention vs before q/k/v: 0.921 (-7.9%)
 │   sensor overhead: 30.37 ms (0.41% of prefill)
 
-## CANDLECLI_ATTN_ROWS = unset (1 row), rerun
+## A (old layout), rerun
 ┌─ bench  qwen3-1.7b  ·  16/4 threads (prefill/decode)  ·  3 reps  ·  1.83 GB  ·  mode fast
 │ pp512       172.60 ± 4.10    tok/s   (2967.6 ms)
 │   attention core      393.283   13.3%
@@ -63,7 +63,7 @@
 │   after attention vs before q/k/v: 0.582 (-41.8%)
 │   sensor overhead: 41.55 ms (0.47% of prefill)
 
-## CANDLECLI_ATTN_ROWS = unset (1 row)
+## A (old layout)
 ┌─ bench  qwen3  ·  16/4 threads (prefill/decode)  ·  3 reps  ·  0.64 GB  ·  mode fast
 │ pp512       419.70 ± 27.62   tok/s   (1223.6 ms)
 │   attention core      320.020   26.2%
@@ -78,7 +78,7 @@
 │   after attention vs before q/k/v: 0.849 (-15.1%)
 │   sensor overhead: 31.18 ms (0.85% of prefill)
 
-## CANDLECLI_ATTN_ROWS = 4
+## B (intermediate setting)
 ┌─ bench  qwen3  ·  16/4 threads (prefill/decode)  ·  3 reps  ·  0.64 GB  ·  mode fast
 │ pp512       487.67 ± 25.40   tok/s   (1051.8 ms)
 │   attention core      159.365   15.2%
@@ -93,7 +93,7 @@
 │   after attention vs before q/k/v: 0.940 (-6.0%)
 │   sensor overhead: 30.91 ms (0.98% of prefill)
 
-## CANDLECLI_ATTN_ROWS = 8
+## C (default setting)
 ┌─ bench  qwen3  ·  16/4 threads (prefill/decode)  ·  3 reps  ·  0.64 GB  ·  mode fast
 │ pp512       512.41 ± 26.63   tok/s   (1001.0 ms)
 │   attention core      154.996   15.5%
@@ -108,7 +108,7 @@
 │   after attention vs before q/k/v: 0.948 (-5.2%)
 │   sensor overhead: 28.40 ms (0.95% of prefill)
 
-## CANDLECLI_ATTN_ROWS = unset (1 row)
+## A (old layout)
 ┌─ bench  qwen3-4b  ·  16/4 threads (prefill/decode)  ·  3 reps  ·  4.28 GB  ·  mode fast
 │ pp512        73.61 ± 1.18    tok/s   (6957.2 ms)
 │   attention core     1099.100   15.8%
@@ -123,7 +123,7 @@
 │   after attention vs before q/k/v: 0.610 (-39.0%)
 │   sensor overhead: 44.75 ms (0.21% of prefill)
 
-## CANDLECLI_ATTN_ROWS = 4
+## B (intermediate setting)
 ┌─ bench  qwen3-4b  ·  16/4 threads (prefill/decode)  ·  3 reps  ·  4.28 GB  ·  mode fast
 │ pp512        82.22 ± 0.86    tok/s   (6227.7 ms)
 │   attention core      354.666    5.7%
@@ -138,7 +138,7 @@
 │   after attention vs before q/k/v: 0.878 (-12.2%)
 │   sensor overhead: 40.45 ms (0.22% of prefill)
 
-## CANDLECLI_ATTN_ROWS = 8
+## C (default setting)
 ┌─ bench  qwen3-4b  ·  16/4 threads (prefill/decode)  ·  3 reps  ·  4.28 GB  ·  mode fast
 │ pp512        81.97 ± 2.98    tok/s   (6252.1 ms)
 │   attention core      372.540    6.0%

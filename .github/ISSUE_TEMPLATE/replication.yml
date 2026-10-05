@@ -11,6 +11,13 @@ body:
     validations:
       required: true
   - type: input
+    id: tool
+    attributes:
+      label: How you measured it
+      description: The probe code from the finding, your own program following its protocol, or Ember once it is public.
+    validations:
+      required: true
+  - type: input
     id: cpu
     attributes:
       label: CPU
