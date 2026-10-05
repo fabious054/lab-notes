@@ -1,5 +1,5 @@
 # Round v8 (2026-10-04): core clock at five points per layer, inside the engine
-# CandleCLI `/bench 512 0 --clock` (issue #120, commit e27c9a6), fast mode, Ryzen 7 5700X.
+# CandleCLI `/bench 512 0 --clock` (engine private for now), fast mode, Ryzen 7 5700X.
 # Each bench below is copied verbatim; only the cargo/linker lines were removed and the closing border lines shortened.
 
 ## qwen3 (0.6B)

@@ -15,7 +15,7 @@ Por [Fabio Henrique](https://github.com/fabious054) (CodeWave.IT).
 | Pasta | O que vai nela |
 |---|---|
 | [`cpu/`](cpu/) | Comportamento do hardware: clock, caches, núcleos, gerenciamento de energia, armadilhas de medição |
-| [`inference/`](inference/) | Resultados do [CandleCLI](https://github.com/fabious054/CandleCLI), motor de inferência de LLM em CPU escrito do zero em Rust puro, medido contra outras ferramentas |
+| [`inference/`](inference/) | Resultados do CandleCLI (privado por enquanto), motor de inferência de LLM em CPU escrito do zero em Rust puro, medido contra outras ferramentas |
 
 ## Achados
 
@@ -49,6 +49,14 @@ exato usado na outra ferramenta, números brutos); os detalhes de
 implementação do motor não.
 
 ## Rode na sua máquina
+
+Os achados de CPU são medidos com o Ember, meu laboratório de CPU, que
+por enquanto é privado; a abertura está nos planos, e com ela um teste
+pronto para rodar em cada achado. Até lá, alguns achados trazem o
+próprio código do teste (por exemplo o
+[0001](cpu/0001-post-attention-slowdown/probe.rs) e o
+[0002](cpu/0002-rdpru-user-mode-windows/rdpru.rs)), e todo achado
+descreve o protocolo com detalhe suficiente para você escrever o seu.
 
 Se você reproduzir um achado, ou não conseguir, abra uma issue com o
 modelo "Replication". Um resultado que discorda vale tanto quanto um que

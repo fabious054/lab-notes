@@ -1,7 +1,8 @@
 # Raw output — finding 0001
 
 Console output of each diagnostic round, copied verbatim. Only compiler
-warnings and local paths were removed.
+warnings and local paths were removed. Lines starting with `#` are
+annotations added afterwards (what was run, in which order).
 
 | File | Round | What it tested |
 |---|---|---|
@@ -12,8 +13,8 @@ warnings and local paths were removed.
 | `v5.txt` | v5 | Output buffer alignment (+0/16/32/48 bytes) |
 | `v6.txt` | v6 | `q_proj` run right after attention; per-task timelines; 0.3 ms spin first |
 | `v7.txt` | v7 | Memory-free probes (integer chain, AVX2 FMA) at three points |
-| `v8-clock.txt` | v8 | CandleCLI `/bench 512 0 --clock`: core clock of every pool thread at five points per layer, 0.6B/1.7B/4B (2026-10-04) |
-| `v9-kv-tiles.txt` | v9 | K/V tiles in attention (1, 4, 8 rows per K/V pass), clock and stage times, 0.6B/1.7B/4B (2026-10-04, extract) |
+| `v8-clock.txt` | v8 | CandleCLI (private for now) `/bench 512 0 --clock`: core clock of every pool thread at five points per layer, 0.6B/1.7B/4B (2026-10-04) |
+| `v9-attention.txt` | v9 | Old vs new attention layout (A, B, C), clock and stage times, 0.6B/1.7B/4B (2026-10-04, extract) |
 
 Line formats:
 

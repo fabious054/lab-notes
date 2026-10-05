@@ -1,6 +1,6 @@
 # inference
 
-Results of [CandleCLI](https://github.com/fabious054/CandleCLI), a CPU LLM
+Results of CandleCLI (private for now), a CPU LLM
 inference engine written from scratch in pure Rust, measured against
 other tools on the same machine.
 
