@@ -25,6 +25,7 @@ Por [Fabio Henrique](https://github.com/fabious054) (CodeWave.IT).
 | 0002 | [APERF/MPERF podem ser lidos do modo usuário no Windows pelo RDPRU](cpu/0002-rdpru-user-mode-windows/) | cpu | Uma máquina só |
 | 0003 | [Um núcleo que dorme mais de ~1–2 ms volta ~20% mais lento por até 1 ms](cpu/0003-core-wake-ramp/) | cpu | Uma máquina só |
 | 0004 | [Leitura rápida de memória derruba o clock do chip inteiro, e a fase seguinte paga por 10–40 ms](cpu/0004-post-streaming-clock-depression/) | cpu | Duas máquinas (Zen 3; gatilho da L3 também em Intel Tiger Lake-H) |
+| 0005 | [CandleCLI contra llama.cpp b11382 no Qwen3 Q8_0: lê o prompt mais rápido no 1.7B e no 4B, 2–6% atrás na geração](inference/0005-qwen3-vs-llama-cpp-b11382/) | inference | Uma máquina só |
 
 ## Como ler um achado
 

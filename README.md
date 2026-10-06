@@ -24,6 +24,7 @@ By [Fabio Henrique](https://github.com/fabious054) (CodeWave.IT).
 | 0002 | [APERF/MPERF are readable from user mode on Windows through RDPRU](cpu/0002-rdpru-user-mode-windows/) | cpu | Single machine |
 | 0003 | [A core that sleeps more than ~1–2 ms restarts ~20% slower for up to 1 ms](cpu/0003-core-wake-ramp/) | cpu | Single machine |
 | 0004 | [Fast streaming reads lower the whole chip's clock, and the next phase pays for 10–40 ms](cpu/0004-post-streaming-clock-depression/) | cpu | Two machines (Zen 3; L3 trigger also on Intel Tiger Lake-H) |
+| 0005 | [CandleCLI vs llama.cpp b11382 on Qwen3 Q8_0: faster prompt reading on 1.7B and 4B, 2–6% behind on generation](inference/0005-qwen3-vs-llama-cpp-b11382/) | inference | Single machine |
 
 ## How to read a finding
 

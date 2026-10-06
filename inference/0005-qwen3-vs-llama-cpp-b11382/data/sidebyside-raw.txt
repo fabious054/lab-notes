@@ -1,0 +1,300 @@
+Lado a lado: CandleCLI x llama.cpp b11382
+Início: 2026-10-04 04:06:58
+Máquina: AMD Ryzen 7 5700X (8C/16T), Windows 11
+load_backend: loaded RPC backend from <llama.cpp b11382 folder>\ggml-rpc.dll
+load_backend: loaded CPU backend from <llama.cpp b11382 folder>\ggml-cpu-haswell.dll
+version: 0.5.0-dev (build 11382, commit 11fe02151)
+built with Clang 20.1.8 for Windows x86_64
+
+=== [1] 04:08:58 llama · qwen3 · -p 512 -n 0 -t 16 -r 3
+| model                          |       size |     params | backend    | threads |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | ------: | --------------: | -------------------: |
+| qwen3 0.6B Q8_0                | 604.15 MiB |   596.05 M | CPU        |      16 |           pp512 |       520.20 ± 17.26 |
+
+build: 11fe02151 (11382)
+
+=== [2] 04:11:04 candle · qwen3 · /bench 512 0 16
+candlecli 0.1.0
+→ Loading default model: qwen3...
+→ loading qwen3…
+✓ qwen3 loaded (1.4 s).
+
+✓ bench: pp512 tg0 · threads 16 · 3 reps — running, this can take a while…
+→ bench pp512 tg0…
+
+┌─ bench  qwen3  ·  16 threads  ·  3 reps  ·  0.64 GB  ·  mode fast
+│ pp512       542.13 ± 31.15   tok/s   (946.6 ms)
+└─
+
+
+=== [3] 04:13:08 llama · qwen3 · -p 512 -n 0 -t 16 -r 3
+| model                          |       size |     params | backend    | threads |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | ------: | --------------: | -------------------: |
+| qwen3 0.6B Q8_0                | 604.15 MiB |   596.05 M | CPU        |      16 |           pp512 |        528.33 ± 9.98 |
+
+build: 11fe02151 (11382)
+
+=== [4] 04:15:13 candle · qwen3 · /bench 512 0 16
+candlecli 0.1.0
+→ Loading default model: qwen3...
+→ loading qwen3…
+✓ qwen3 loaded (1.4 s).
+
+✓ bench: pp512 tg0 · threads 16 · 3 reps — running, this can take a while…
+→ bench pp512 tg0…
+
+┌─ bench  qwen3  ·  16 threads  ·  3 reps  ·  0.64 GB  ·  mode fast
+│ pp512       547.03 ± 33.28   tok/s   (938.4 ms)
+└─
+
+
+=== [5] 04:17:17 llama · qwen3 · -p 0 -n 128 -t 4 -r 3
+| model                          |       size |     params | backend    | threads |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | ------: | --------------: | -------------------: |
+| qwen3 0.6B Q8_0                | 604.15 MiB |   596.05 M | CPU        |       4 |           tg128 |         47.40 ± 0.13 |
+
+build: 11fe02151 (11382)
+
+=== [6] 04:19:26 candle · qwen3 · /bench 0 128 4
+candlecli 0.1.0
+→ Loading default model: qwen3...
+→ loading qwen3…
+✓ qwen3 loaded (1.4 s).
+
+✓ bench: pp0 tg128 · threads 4 · 3 reps — running, this can take a while…
+→ bench pp0 tg128…
+
+┌─ bench  qwen3  ·  4 threads  ·  3 reps  ·  0.64 GB  ·  mode fast
+│ tg128        44.98 ± 2.19    tok/s   (22.23 ms/token · ≈ 28.8 GB/s weights)
+│ per generated token, outside forward:
+│   sampler         0.478 ms
+│   detokenize      0.033 ms avg   (0.046 ms at token 128 — full re-decode)
+│ decode incl. sampler + detokenize: 43.90 tok/s
+└─
+
+
+=== [7] 04:21:36 llama · qwen3 · -p 0 -n 128 -t 8 -r 3
+| model                          |       size |     params | backend    | threads |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | ------: | --------------: | -------------------: |
+| qwen3 0.6B Q8_0                | 604.15 MiB |   596.05 M | CPU        |       8 |           tg128 |         46.47 ± 0.15 |
+
+build: 11fe02151 (11382)
+
+=== [8] 04:23:45 candle · qwen3 · /bench 0 128 8
+candlecli 0.1.0
+→ Loading default model: qwen3...
+→ loading qwen3…
+✓ qwen3 loaded (1.4 s).
+
+✓ bench: pp0 tg128 · threads 8 · 3 reps — running, this can take a while…
+→ bench pp0 tg128…
+
+┌─ bench  qwen3  ·  8 threads  ·  3 reps  ·  0.64 GB  ·  mode fast
+│ tg128        43.87 ± 0.47    tok/s   (22.80 ms/token · ≈ 28.0 GB/s weights)
+│ per generated token, outside forward:
+│   sampler         0.474 ms
+│   detokenize      0.033 ms avg   (0.048 ms at token 128 — full re-decode)
+│ decode incl. sampler + detokenize: 42.91 tok/s
+└─
+
+
+=== [9] 04:25:56 llama · qwen3-1.7b · -p 512 -n 0 -t 16 -r 3
+| model                          |       size |     params | backend    | threads |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | ------: | --------------: | -------------------: |
+| qwen3 1.7B Q8_0                |   1.70 GiB |     1.72 B | CPU        |      16 |           pp512 |       178.95 ± 10.23 |
+
+build: 11fe02151 (11382)
+
+=== [10] 04:28:08 candle · qwen3-1.7b · /bench 512 0 16
+candlecli 0.1.0
+→ Loading default model: qwen3...
+→ loading qwen3…
+✓ qwen3 loaded (1.4 s).
+
+→ loading qwen3-1.7b…
+✓ model loaded: qwen3-1.7b (2.3 s)
+✓ bench: pp512 tg0 · threads 16 · 3 reps — running, this can take a while…
+→ bench pp512 tg0…
+
+┌─ bench  qwen3-1.7b  ·  16 threads  ·  3 reps  ·  1.83 GB  ·  mode fast
+│ pp512       208.87 ± 3.00    tok/s   (2451.7 ms)
+└─
+
+
+=== [11] 04:30:20 llama · qwen3-1.7b · -p 512 -n 0 -t 16 -r 3
+| model                          |       size |     params | backend    | threads |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | ------: | --------------: | -------------------: |
+| qwen3 1.7B Q8_0                |   1.70 GiB |     1.72 B | CPU        |      16 |           pp512 |        183.48 ± 0.81 |
+
+build: 11fe02151 (11382)
+
+=== [12] 04:32:32 candle · qwen3-1.7b · /bench 512 0 16
+candlecli 0.1.0
+→ Loading default model: qwen3...
+→ loading qwen3…
+✓ qwen3 loaded (1.4 s).
+
+→ loading qwen3-1.7b…
+✓ model loaded: qwen3-1.7b (2.3 s)
+✓ bench: pp512 tg0 · threads 16 · 3 reps — running, this can take a while…
+→ bench pp512 tg0…
+
+┌─ bench  qwen3-1.7b  ·  16 threads  ·  3 reps  ·  1.83 GB  ·  mode fast
+│ pp512       211.15 ± 6.84    tok/s   (2426.5 ms)
+└─
+
+
+=== [13] 04:34:43 llama · qwen3-1.7b · -p 0 -n 128 -t 4 -r 3
+| model                          |       size |     params | backend    | threads |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | ------: | --------------: | -------------------: |
+| qwen3 1.7B Q8_0                |   1.70 GiB |     1.72 B | CPU        |       4 |           tg128 |         17.43 ± 0.13 |
+
+build: 11fe02151 (11382)
+
+=== [14] 04:37:06 candle · qwen3-1.7b · /bench 0 128 4
+candlecli 0.1.0
+→ Loading default model: qwen3...
+→ loading qwen3…
+✓ qwen3 loaded (1.5 s).
+
+→ loading qwen3-1.7b…
+✓ model loaded: qwen3-1.7b (2.3 s)
+✓ bench: pp0 tg128 · threads 4 · 3 reps — running, this can take a while…
+→ bench pp0 tg128…
+
+┌─ bench  qwen3-1.7b  ·  4 threads  ·  3 reps  ·  1.83 GB  ·  mode fast
+│ tg128        17.11 ± 0.10    tok/s   (58.46 ms/token · ≈ 31.4 GB/s weights)
+│ per generated token, outside forward:
+│   sampler         0.490 ms
+│   detokenize      0.040 ms avg   (0.062 ms at token 128 — full re-decode)
+│ decode incl. sampler + detokenize: 16.95 tok/s
+└─
+
+
+=== [15] 04:39:33 llama · qwen3-1.7b · -p 0 -n 128 -t 8 -r 3
+| model                          |       size |     params | backend    | threads |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | ------: | --------------: | -------------------: |
+| qwen3 1.7B Q8_0                |   1.70 GiB |     1.72 B | CPU        |       8 |           tg128 |         17.04 ± 0.07 |
+
+build: 11fe02151 (11382)
+
+=== [16] 04:41:57 candle · qwen3-1.7b · /bench 0 128 8
+candlecli 0.1.0
+→ Loading default model: qwen3...
+→ loading qwen3…
+✓ qwen3 loaded (1.4 s).
+
+→ loading qwen3-1.7b…
+✓ model loaded: qwen3-1.7b (2.3 s)
+✓ bench: pp0 tg128 · threads 8 · 3 reps — running, this can take a while…
+→ bench pp0 tg128…
+
+┌─ bench  qwen3-1.7b  ·  8 threads  ·  3 reps  ·  1.83 GB  ·  mode fast
+│ tg128        16.39 ± 0.11    tok/s   (61.01 ms/token · ≈ 30.1 GB/s weights)
+│ per generated token, outside forward:
+│   sampler         0.478 ms
+│   detokenize      0.040 ms avg   (0.062 ms at token 128 — full re-decode)
+│ decode incl. sampler + detokenize: 16.25 tok/s
+└─
+
+
+=== [17] 04:44:25 llama · qwen3-4b · -p 512 -n 0 -t 16 -r 3
+| model                          |       size |     params | backend    | threads |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | ------: | --------------: | -------------------: |
+| qwen3 4B Q8_0                  |   3.98 GiB |     4.02 B | CPU        |      16 |           pp512 |         73.23 ± 1.78 |
+
+build: 11fe02151 (11382)
+
+=== [18] 04:46:54 candle · qwen3-4b · /bench 512 0 16
+candlecli 0.1.0
+→ Loading default model: qwen3...
+→ loading qwen3…
+✓ qwen3 loaded (1.4 s).
+
+→ loading qwen3-4b…
+✓ model loaded: qwen3-4b (3.9 s)
+✓ bench: pp512 tg0 · threads 16 · 3 reps — running, this can take a while…
+→ bench pp512 tg0…
+
+┌─ bench  qwen3-4b  ·  16 threads  ·  3 reps  ·  4.28 GB  ·  mode fast
+│ pp512        84.72 ± 2.47    tok/s   (6046.7 ms)
+└─
+
+
+=== [19] 04:49:19 llama · qwen3-4b · -p 512 -n 0 -t 16 -r 3
+| model                          |       size |     params | backend    | threads |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | ------: | --------------: | -------------------: |
+| qwen3 4B Q8_0                  |   3.98 GiB |     4.02 B | CPU        |      16 |           pp512 |         71.63 ± 2.12 |
+
+build: 11fe02151 (11382)
+
+=== [20] 04:51:49 candle · qwen3-4b · /bench 512 0 16
+candlecli 0.1.0
+→ Loading default model: qwen3...
+→ loading qwen3…
+✓ qwen3 loaded (1.4 s).
+
+→ loading qwen3-4b…
+✓ model loaded: qwen3-4b (3.8 s)
+✓ bench: pp512 tg0 · threads 16 · 3 reps — running, this can take a while…
+→ bench pp512 tg0…
+
+┌─ bench  qwen3-4b  ·  16 threads  ·  3 reps  ·  4.28 GB  ·  mode fast
+│ pp512        84.88 ± 1.79    tok/s   (6033.7 ms)
+└─
+
+
+=== [21] 04:54:13 llama · qwen3-4b · -p 0 -n 128 -t 4 -r 3
+| model                          |       size |     params | backend    | threads |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | ------: | --------------: | -------------------: |
+| qwen3 4B Q8_0                  |   3.98 GiB |     4.02 B | CPU        |       4 |           tg128 |          7.58 ± 0.01 |
+
+build: 11fe02151 (11382)
+
+=== [22] 04:57:05 candle · qwen3-4b · /bench 0 128 4
+candlecli 0.1.0
+→ Loading default model: qwen3...
+→ loading qwen3…
+✓ qwen3 loaded (1.4 s).
+
+→ loading qwen3-4b…
+✓ model loaded: qwen3-4b (3.8 s)
+✓ bench: pp0 tg128 · threads 4 · 3 reps — running, this can take a while…
+→ bench pp0 tg128…
+
+┌─ bench  qwen3-4b  ·  4 threads  ·  3 reps  ·  4.28 GB  ·  mode fast
+│ tg128         7.44 ± 0.03    tok/s   (134.34 ms/token · ≈ 31.9 GB/s weights)
+│ per generated token, outside forward:
+│   sampler         0.471 ms
+│   detokenize      0.037 ms avg   (0.057 ms at token 128 — full re-decode)
+│ decode incl. sampler + detokenize: 7.42 tok/s
+└─
+
+
+=== [23] 05:00:03 llama · qwen3-4b · -p 0 -n 128 -t 8 -r 3
+| model                          |       size |     params | backend    | threads |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | ------: | --------------: | -------------------: |
+| qwen3 4B Q8_0                  |   3.98 GiB |     4.02 B | CPU        |       8 |           tg128 |          7.32 ± 0.04 |
+
+build: 11fe02151 (11382)
+
+=== [24] 05:02:57 candle · qwen3-4b · /bench 0 128 8
+candlecli 0.1.0
+→ Loading default model: qwen3...
+→ loading qwen3…
+✓ qwen3 loaded (1.4 s).
+
+→ loading qwen3-4b…
+✓ model loaded: qwen3-4b (3.9 s)
+✓ bench: pp0 tg128 · threads 8 · 3 reps — running, this can take a while…
+→ bench pp0 tg128…
+
+┌─ bench  qwen3-4b  ·  8 threads  ·  3 reps  ·  4.28 GB  ·  mode fast
+│ tg128         7.10 ± 0.03    tok/s   (140.82 ms/token · ≈ 30.4 GB/s weights)
+│ per generated token, outside forward:
+│   sampler         0.481 ms
+│   detokenize      0.039 ms avg   (0.062 ms at token 128 — full re-decode)
+│ decode incl. sampler + detokenize: 7.08 tok/s
+└─
+
+Fim: 2026-10-04 05:03:58

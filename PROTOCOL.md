@@ -46,3 +46,27 @@ Tables in the write-up are derived from it, never the other way around.
 
 Each conclusion is marked as either supported by the data or a
 hypothesis. Hypotheses stay open until a measurement settles them.
+
+## 7. Measure memory with the OS counters, read by a program
+
+Memory is never read by eye from Task Manager or `top`: the value moves
+while you read it, depends on when you look, and leaves nothing to
+compare. The program under test (or a harness around it) reads the
+operating system's counters at fixed points (for example, right after
+loading and right after the workload) and prints them with the rest of
+the results:
+
+- **private**: memory only this process can use (Windows
+  `PrivateUsage`, Linux `RssAnon`); a memory-mapped file is not in it;
+- **working set**: everything resident for the process, mapped files
+  included (Windows `WorkingSetSize`, Linux `VmRSS`);
+- **peak working set**: the highest working set since the process
+  started (Windows `PeakWorkingSetSize`, Linux `VmHWM`).
+
+Compare tools on the same counter. A tool that maps its model file
+shows it in the working set, not in private memory, so comparing one
+tool's private memory with another's working set is meaningless.
+
+On the reference machine, a first estimate made from reading the code
+missed half of an engine's private memory; the program's own reading
+found the rest the same day.
