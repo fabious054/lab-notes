@@ -6,8 +6,8 @@
 
 ## Question
 
-How does CandleCLI, a CPU inference engine written from scratch in pure
-Rust (private for now), compare with the latest llama.cpp on the same
+How does CandleCLI, my own CPU inference engine in Rust (private for
+now), compare with the latest llama.cpp on the same
 machine, the same model files and the same thread counts?
 
 ## Machine

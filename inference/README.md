@@ -1,8 +1,8 @@
 # inference
 
-Results of CandleCLI (private for now), a CPU LLM
-inference engine written from scratch in pure Rust, measured against
-other tools on the same machine.
+Results of CandleCLI (private for now), my own CPU LLM inference
+engine in Rust (no Python, llama.cpp or Ollama at runtime), measured
+against other tools on the same machine.
 
 Each result records the machine, the model file, the exact command used
 for the other tool, and the raw numbers, following
