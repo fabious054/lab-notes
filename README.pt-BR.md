@@ -15,7 +15,7 @@ Por [Fabio Henrique](https://github.com/fabious054) (CodeWave.IT).
 | Pasta | O que vai nela |
 |---|---|
 | [`cpu/`](cpu/) | Comportamento do hardware: clock, caches, núcleos, gerenciamento de energia, armadilhas de medição |
-| [`inference/`](inference/) | Resultados do CandleCLI (privado por enquanto), motor de inferência de LLM em CPU escrito do zero em Rust puro, medido contra outras ferramentas |
+| [`inference/`](inference/) | Resultados do CandleCLI (privado por enquanto), meu próprio motor de inferência de LLM em CPU, em Rust (sem Python, llama.cpp ou Ollama em tempo de execução), medido contra outras ferramentas |
 
 ## Achados
 

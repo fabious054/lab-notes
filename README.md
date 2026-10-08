@@ -14,7 +14,7 @@ By [Fabio Henrique](https://github.com/fabious054) (CodeWave.IT).
 | Folder | What goes there |
 |---|---|
 | [`cpu/`](cpu/) | Hardware behaviour: clocks, caches, cores, power management, measurement pitfalls |
-| [`inference/`](inference/) | Results of CandleCLI (private for now), a CPU LLM inference engine written from scratch in pure Rust, measured against other tools |
+| [`inference/`](inference/) | Results of CandleCLI (private for now), my own CPU LLM inference engine in Rust (no Python, llama.cpp or Ollama at runtime), measured against other tools |
 
 ## Findings
 
